@@ -8,7 +8,6 @@ public:
 	
 	static void handle_error(char *errbuf, int context);
 
-
 	enum context {
 		CLI,
 		GUI
