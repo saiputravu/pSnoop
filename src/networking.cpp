@@ -1,5 +1,5 @@
 #include "networking.hpp"
-#include "error.hpp"
+#include "Utils/error.hpp"
 
 Networking::Networking() {
 	this->populate_interfaces();
@@ -33,7 +33,7 @@ void Networking::start_listening() {
 	}
 
 	// Open in non-promisc mode, with timeout of unlimited
-	this->handle = pcap_open_live(this->open_device, BUFSIZ, 0, 0, this->errbuf);
+	this->handle = pcap_open_live(this->open_device, BUFSIZ, 0, 1, this->errbuf);
 	if (this->handle == NULL) {
 		Error::handle_error(this->errbuf, Error::CLI);
 		return;
