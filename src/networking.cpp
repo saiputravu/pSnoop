@@ -14,7 +14,7 @@ int Networking::populate_interfaces() {
 	// Gather all devices
 	pcap_if_t *temp_dev, *temp;
 	if (pcap_findalldevs(&temp_dev, this->errbuf) == -1) {
-		Error::handle_error(this->errbuf, Error::CLI);	
+		Error::handle_error(this->errbuf, Error::CLI, "Networking::populate_interfaces");	
 		return -1;
 	}
 
@@ -52,7 +52,7 @@ int Networking::get_next_packet(unsigned char **packet, struct pcap_pkthdr *head
 	
 	*packet = (unsigned char *)pcap_next(this->handle, header);
 	if (*packet == NULL) {
-		Error::handle_error(this->errbuf, Error::CLI);
+		Error::handle_error(this->errbuf, Error::CLI, "Networking::get_next_packet");
 		return -1;
 	}
 

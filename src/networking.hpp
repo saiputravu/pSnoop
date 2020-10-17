@@ -31,7 +31,7 @@ public:
 							&this->subnet,
 							&this->netmask,
 							this->errbuf) == -1)  {
-			Error::handle_error(this->errbuf, Error::CLI);
+			Error::handle_error(this->errbuf, Error::CLI, "Networking::set_subnet_netmask");
 			return false;
 		}
 		return true;

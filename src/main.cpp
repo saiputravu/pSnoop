@@ -15,7 +15,7 @@ int main() {
 	std::cout << "\tSubnet:  " << Utils::convert_bpf(capture.get_subnet()) << std::endl;
 	std::cout << "\tNetmask: " << Utils::convert_bpf(capture.get_netmask()) << std::endl;
 	
-	capture.set_filter((const char *)"port 53");
+	capture.set_filter((const char *)"port 443 or port 1337 or port 80");
 	capture.start_listening();
 	
 	std::cout << "Started Listening for packets!" << std::endl;
