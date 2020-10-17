@@ -8,10 +8,10 @@ Error::~Error() {
 
 }
 
-void Error::handle_error(char *errbuf, int context) {
+void Error::handle_error(char *errbuf, int context, const char *prev) {
 	switch (context) {
 		case CLI:
-			fprintf(stderr, "Error thrown: %s\n", errbuf);
+			fprintf(stderr, "Error thrown in [%s]: %s\n", prev, errbuf);
 			break;
 		case GUI:
 			break;
