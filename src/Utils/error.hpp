@@ -3,18 +3,18 @@
 #include <execinfo.h>
 
 class Error {
-public:
-	Error();
-	~Error();
-	
-	static void handle_error(char *errbuf, int context, std::string prev="");
+	public:
+		Error();
+		~Error();
 
-	enum context {
-		CLI,
-		GUI
-	};
-	
-private:
+		static void handle_error(char *errbuf, int context, std::string prev="");
+
+		enum context {
+			CLI,
+			GUI
+		};
+
+	private:
 
 };
 

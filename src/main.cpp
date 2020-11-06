@@ -15,11 +15,11 @@ int main() {
 	std::cout << "Selected device " << capture.get_cur_device() << std::endl;
 	std::cout << "\tSubnet:  " << Utils::convert_bpf(capture.get_subnet()) << std::endl;
 	std::cout << "\tNetmask: " << Utils::convert_bpf(capture.get_netmask()) << std::endl;
-	
+
 	// Setup and start listening (specify count to set how many to capture)
 	capture.set_filter((const char *)"port 53");
 	capture.start_listening(100);
-	
+
 	// Displaying packets
 	for (int i = 0; i < 100; ++i) {
 		Packet *pkt = (*(PacketStream *)capture.get_packet_stream())[i];

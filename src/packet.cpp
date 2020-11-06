@@ -6,7 +6,7 @@ Packet::Packet(int frame,
 		unsigned char *data) {
 
 	this->frame = frame;	// Set frame as given number
-	
+
 	// Allocate heap space for header struct and set address as data
 	this->header = (struct pcap_pkthdr *)calloc(1, sizeof(struct pcap_pkthdr));
 	if (this->header == nullptr)
