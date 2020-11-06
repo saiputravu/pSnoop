@@ -1,4 +1,6 @@
 #include "networking.hpp"
+#include "Utils/utils.hpp"
+#include "Utils/error.hpp"
 
 Networking::Networking() {
 	this->populate_interfaces();
@@ -8,6 +10,44 @@ Networking::~Networking() {
 	// Free all the allocated memory, prevent a memory leak
 	pcap_freealldevs(this->devices[0]);
 	pcap_close(this->handle);
+}
+
+bool Networking::set_subnet_netmask() {
+	if (pcap_lookupnet(this->selected_device,
+						&this->subnet,
+						&this->netmask,
+						this->errbuf) == -1)  {
+		Error::handle_error(this->errbuf, Error::CLI, "Networking::set_subnet_netmask");
+		return false;
+	}
+	return true;
+}
+
+void Networking::open_live_device(int timeout, bool promiscuous) {
+	// Check the network interface string is selected
+	if (this->selected_device == NULL) {
+		Error::handle_error((char *)"Please select a device to listen on", Error::CLI);
+		return;
+	}
+
+	// Open in (non-)promiscuous mode, with timeout of timeout 
+	this->handle = pcap_open_live(this->selected_device, 
+									BUFSIZ, 
+									promiscuous, 
+									timeout, 
+									this->errbuf);
+	if (this->handle == NULL) {
+		Error::handle_error(this->errbuf, Error::CLI);
+		return;
+	}
+}
+
+void Networking::setup_device(int index, int timeout, bool promiscuous) { 
+	if (index >= 0 && index < (this->devices).size()) {
+		this->selected_device = (this->devices[index])->name;
+		this->set_subnet_netmask();	
+		this->open_live_device(timeout, promiscuous);
+	}
 }
 
 int Networking::populate_interfaces() {
@@ -25,24 +65,35 @@ int Networking::populate_interfaces() {
 	return 0;
 }
 
-void Networking::start_listening(int count) {
+void Networking::start_listening(int max_count) {
 	unsigned char *packet;
 	struct pcap_pkthdr header;
 
 	// Loop for every packet captured until conditions met 
-	while (true || (count != 0 && this->packet_count < count)) {
+	while ((true && max_count == 0) || this->packet_count < (unsigned int)max_count) {
 		if (this->get_next_packet(&packet, &header) != 0) {
-			// Error::handle_error((char *)"Unable to capture packet.", Error::CLI);
+			Error::handle_error((char *)"Unable to capture packet.", Error::CLI);
 			continue;
 		}
 
-		std::cout << "[" << this->packet_count << "] Packet Captured" << std::endl;
-		std::cout << "\t[-] Length: " << header.len << std::endl;
-		std::cout << "\t[-] Time  : " << Utils::convert_time(header.ts.tv_sec) << std::endl;
+		// Add packet to packet stream
+		this->packet_stream->push_back(this->packet_count, header, packet);
+	
+		// If max_count is specified, log to stdout how many captured.
+		if (max_count != 0)
+			std::cout << "[" << this->packet_count << "/" << max_count << "] Packet Captured" << std::endl;
 
-		std::cout << std::endl;
-		Utils::hexdump(packet, header.len);
-		std::cout << std::endl;
+		// Separate output lines, commented out for now
+		
+		//std::cout << "\t[-] Length: " << packet_obj->get_header_len() << std::endl;
+		//std::cout << "\t[-] Time  : " << Utils::convert_time(packet_obj->get_header_timestamp()) << std::endl;
+        //
+		//std::cout << std::endl;
+		//Utils::hexdump(packet_obj->get_data(), packet_obj->get_header_len());
+		//std::cout << std::endl;
+
+		// Increment successful packet count
+		this->packet_count++;
 	}
 }
 
@@ -56,8 +107,6 @@ int Networking::get_next_packet(unsigned char **packet, struct pcap_pkthdr *head
 		return -1;
 	}
 
-	// Increment successful packet count
-	this->packet_count++;
 	return 0;
 }
 

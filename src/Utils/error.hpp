@@ -7,7 +7,7 @@ public:
 	Error();
 	~Error();
 	
-	static void handle_error(char *errbuf, int context, const char *prev="");
+	static void handle_error(char *errbuf, int context, std::string prev="");
 
 	enum context {
 		CLI,

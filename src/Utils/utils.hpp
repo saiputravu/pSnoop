@@ -15,7 +15,7 @@ public:
 
 	static void hexdump(unsigned char *string, unsigned int length) {
 
-		for (int i = 0; i < length-8; i+=8) {
+		for (unsigned int i = 0; i < length-8; i+=8) {
 			for (int c = 0; c < 8; ++c)
 				printf("%02x ", (unsigned char)string[i+c]);
 			printf("|");
@@ -31,13 +31,13 @@ public:
 			printf("\n");
 		}
 		
-		for (int i = length - (length%8); i < length; ++i)
+		for (unsigned int i = length - (length%8); i < length; ++i)
 			printf("%02x ", (unsigned char)string[i]);
-		for (int i = length; i < length + (8 - (length%8)); i++) 
+		for (unsigned int i = length; i < length + (8 - (length%8)); i++) 
 			printf("   ");
 		printf("|");
 
-		for (int i = length- (length%8); i < length; ++i) {
+		for (unsigned int i = length- (length%8); i < length; ++i) {
 			if (0x20 <= (unsigned char)(string[i]) && (unsigned char)(string[i])<= 0x7e )
 				printf("%c", (unsigned char)string[i]);
 			else
