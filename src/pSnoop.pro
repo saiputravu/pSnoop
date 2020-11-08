@@ -3,7 +3,7 @@
 ######################################################################
 
 TEMPLATE = app
-TARGET = pSnoopGui
+TARGET = ../build/pSnoopGui
 INCLUDEPATH += .
 QT += gui widgets
 

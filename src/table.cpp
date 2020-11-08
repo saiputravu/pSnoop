@@ -18,6 +18,9 @@ Table::Table(QWidget *parent,
 	// Set labels 
 	this->table->setHorizontalHeaderLabels(this->labels);
 
+	// Set sorting enabled
+	this->table->setSortingEnabled(true);
+
 	// Resize table
 	this->table->setFixedSize(width, height);
 
