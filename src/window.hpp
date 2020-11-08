@@ -3,6 +3,9 @@
 
 #include <QWidget>
 #include <QDesktopWidget>
+#include <QResizeEvent>
+
+#include "table.hpp"
 
 class Window : public QWidget {
 	Q_OBJECT;
@@ -11,9 +14,16 @@ class Window : public QWidget {
 		Window(QWidget *parent = nullptr);
 		~Window();
 
-	private:
-		void init();
+	protected:
+		void resizeEvent(QResizeEvent *event);
 
+	private:
+		// Properties
+		Table *packet_table;
+
+		// Methods
+		void init();
+		
 	signals:
 
 	private slots:

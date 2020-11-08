@@ -3,7 +3,7 @@
 Table::Table(QWidget *parent, 
 		unsigned width, unsigned height,
 		unsigned int x, unsigned int y,
-		unsigned row_height) {
+		unsigned row_height) : height(height), width(width){
 	this->labels << "Frame"
 		<< "Time"
 		<< "Destination" 
@@ -27,6 +27,9 @@ Table::Table(QWidget *parent,
 
 	// Resizing column widths
 	this->table->horizontalHeader()->setStretchLastSection(true);
+
+	// Hide left column
+	this->table->verticalHeader()->setVisible(false);
 }
 
 Table::~Table() {

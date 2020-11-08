@@ -1,5 +1,4 @@
 #include "window.hpp"
-#include "table.hpp"
 
 Window::Window(QWidget *parent) : QWidget(parent) {
 	this->init();
@@ -12,7 +11,7 @@ Window::~Window() {
 void Window::init() {
 	this->resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
 
-	Table t(this, this->width(), 300);
+	this->packet_table = new Table(this, this->width(), (unsigned int)300);
 
 	QStringList a;
 	a << "1"
@@ -20,7 +19,18 @@ void Window::init() {
 		<< "127.0.0.1"
 		<< "127.0.0.1"
 		<< "HTTP"
-		<< "GET HTTP/1.1 /";
+		<< "GET HTTP/1.1  / ajsdaiowoiwdaoioidsspoaddasppkaso";
 	
-	t.append(a);
+	this->packet_table->append(a);
+	this->packet_table->append(a);
+	this->packet_table->append(a);
+}
+
+void Window::resizeEvent(QResizeEvent *event) {
+	
+	// Resize packet_table
+	this->packet_table->get_table()->setFixedSize(this->width(), this->packet_table->get_height());
+
+	// Call normal procedure
+	QWidget::resizeEvent(event);
 }

@@ -22,12 +22,16 @@ class Table : public QWidget {
 		// Getters 
 		QTableWidget *get_table() { return this->table; }	
 		QStringList get_labels() { return this->labels; }
+		unsigned int get_width() { return this->width; }
+		unsigned int get_height() { return this->height; }
 
 		void append(QStringList items);
 
 	private:
 		QTableWidget *table;
 		QStringList labels;
+
+		unsigned int width, height;
 
 	signals:
 
