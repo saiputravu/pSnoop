@@ -19,7 +19,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Input
-HEADERS += window.hpp
+HEADERS += window.hpp \
+	table.hpp
 
 SOURCES += main.cpp \
-	window.cpp
+	window.cpp \
+	table.cpp
