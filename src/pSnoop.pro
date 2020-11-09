@@ -20,8 +20,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 # Input
 HEADERS += window.hpp \
-	table.hpp
+	table.hpp \ 
+	settings.hpp
 
 SOURCES += main.cpp \
 	window.cpp \
-	table.cpp
+	table.cpp \
+	settings.cpp

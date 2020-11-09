@@ -15,17 +15,157 @@ void Window::init_general() {
 	this->resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
 	this->setMinimumSize(300, 300);
 	this->setWindowTitle("pSnoopGUI - Sai");
+
+	this->settings = new Settings("pSnoop.cfg");
+
+	// Setting application wide font
+	QFont font(this->settings->get("font"));
+	font.setStyleHint(QFont::Monospace);
+	font.setPointSize(10);
+	if (this->settings->get("fontsize") != QString("Bad")){
+		bool ok;
+		int fontsize = this->settings->get("fontsize").toInt(&ok, 10);
+		if (ok)
+			font.setPointSize(fontsize);
+	}
+
+	QApplication::setFont(font);
 }
 
 void Window::init_menu() {
 	// File Menu Actions
+	this->open_action = new QAction("&Open", this);
+	this->open_action->setShortcut(QKeySequence("Ctrl+o"));
+	this->open_action->setStatusTip("Open a new .pcap file");
+	this->connect(this->open_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+	
+	this->save_as_action = new QAction("&Save As", this);
+	this->save_as_action->setShortcut(QKeySequence("Ctrl+s"));
+	this->save_as_action->setStatusTip("Save file as ... ");
+	this->connect(this->save_as_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+
+	this->settings_action = new QAction("Preferences", this);
+	this->settings_action->setShortcut(QKeySequence("Ctrl+p"));
+	this->settings_action->setStatusTip("Open preferences ...");
+	this->connect(this->settings_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+	
+	this->quit_action = new QAction("Quit", this);
+	this->quit_action->setShortcut(QKeySequence("Ctrl+w"));
+	this->quit_action->setStatusTip("Quit Application");
+	this->connect(this->quit_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+
 	// File Menu
 	this->file_menu = this->menuBar()->addMenu(QString("&File"));
+	this->file_menu->addAction(open_action);
+	this->file_menu->addAction(save_as_action);
+	this->file_menu->addAction(settings_action);
+	this->file_menu->addSeparator();
+	this->file_menu->addAction(quit_action);
+
+	// Edit Menu Actions
+	this->copy_action = new QAction("&Copy Selection", this);
+	this->copy_action->setShortcut(QKeySequence("Ctrl+c"));
+	this->connect(this->copy_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+
+	this->find_action = new QAction("&Find", this);
+	this->find_action->setShortcut(QKeySequence("Ctrl+f"));
+	this->find_action->setStatusTip("Find instances");
+	this->connect(this->find_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+
+	this->filter_action = new QAction("F&ilter", this);
+	this->filter_action->setStatusTip("Select the filter");
+	this->connect(this->filter_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+
+	// Edit Menu
+	this->edit_menu = this->menuBar()->addMenu(QString("&Edit"));
+	this->edit_menu->addAction(copy_action);
+	this->edit_menu->addAction(find_action);
+	this->edit_menu->addAction(filter_action);
+
+	// Capture Menu Actions
+	this->select_interface_action = new QAction("&Select Interface", this);
+	this->select_interface_action->setShortcut(QKeySequence("Ctrl+i"));
+	this->select_interface_action->setStatusTip("Select the interface to capture packets on"); 
+	this->connect(this->select_interface_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
 	
+	this->start_action = new QAction("&Begin Capture", this);
+	this->start_action->setShortcut(QKeySequence("Ctrl+b"));
+	this->connect(this->start_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+	
+	this->stop_action = new QAction("&End Capture", this);
+	this->stop_action->setShortcut(QKeySequence("Ctrl+e"));
+	this->connect(this->stop_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+
+	this->restart_action = new QAction("&Restart Capture", this);
+	this->restart_action->setShortcut(QKeySequence("Ctrl+Shift+b"));
+	this->connect(this->restart_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+
+	this->capture_filter_action = new QAction("&Capture filter options", this);
+	this->capture_filter_action->setStatusTip("Raw libpcap filter - filter before beginning capturing");
+	this->connect(this->capture_filter_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+	 
+	this->statistics_action = new QAction("S&tatistics", this);
+	this->statistics_action->setStatusTip("Open protocol statistics");
+	this->connect(this->statistics_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::not_implemented);
+	
+	// Capture Menu
+	this->capture_menu = this->menuBar()->addMenu(QString("&Capture"));
+	this->capture_menu->addAction(capture_filter_action);
+	this->capture_menu->addAction(statistics_action);
+	this->capture_menu->addSeparator();
+	this->capture_menu->addAction(start_action);
+	this->capture_menu->addAction(stop_action);
+	this->capture_menu->addAction(restart_action);
+
 	// Help Menu Actions
+	this->about_action = new QAction("&About", this);
+	this->connect(this->about_action, 
+			&QAction::triggered, 
+			this, 
+			&Window::about);
+
 	// Help Menu
 	this->help_menu = this->menuBar()->addMenu(QString("&Help"));
-
+	this->help_menu->addAction(this->about_action);
 }
 
 void Window::init_layout() {
@@ -84,4 +224,61 @@ void Window::resizeEvent(QResizeEvent *event) {
 
 	// Call normal procedure
 	QWidget::resizeEvent(event);
+}
+
+void Window::not_implemented() {
+	QFont local_font(this->settings->get("font"));
+	local_font.setPointSize(10);
+
+	QWidget *pop_up = new QWidget();
+	pop_up->resize(300, 50);
+	pop_up->setWindowTitle("Feature Not Implemented");
+
+	QVBoxLayout *container = new QVBoxLayout;
+	QLabel *label = new QLabel("This has not been implemented yet.");
+	label->setFont(local_font);
+
+	QPushButton *quit_button = new QPushButton();
+	quit_button->setText("Okay");
+	quit_button->setFont(local_font);
+	this->connect(quit_button, SIGNAL(clicked()), pop_up, SLOT(close()));
+
+	container->addWidget(label);
+	container->addWidget(quit_button);
+	pop_up->setLayout(container);
+	
+	pop_up->show();
+}
+
+void Window::about() {
+	QFont local_font(this->settings->get("font"));
+	local_font.setBold(true);
+	local_font.setPointSize(12);
+
+	QWidget *pop_up = new QWidget();
+	pop_up->setWindowTitle("About");
+	pop_up->setFixedSize(400, 300);
+
+	QVBoxLayout *container = new QVBoxLayout;
+	QLabel *header = new QLabel("pSnoop GUI Version");
+	header->setFont(local_font);
+
+	QLabel *about_label = new QLabel("designed and developed by Sai\n"
+			"This is a packet sniffing tool coded in C++\n"
+			"using LibPcap and Qt\n");
+	local_font.setBold(false);
+	local_font.setPointSize(9);
+	about_label->setFont(local_font);
+
+	QPushButton *quit_button = new QPushButton();
+	quit_button->setText("Okay");
+	quit_button->setFont(local_font);
+	this->connect(quit_button, SIGNAL(clicked()), pop_up, SLOT(close()));
+
+	container->addWidget(header);
+	container->addWidget(about_label);
+	container->addWidget(quit_button);
+	pop_up->setLayout(container);
+
+	pop_up->show();
 }

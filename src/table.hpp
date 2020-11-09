@@ -14,6 +14,8 @@
 #include <map>
 #include <string>
 
+#include "settings.hpp"
+
 class Table : public QTableWidget {
 	Q_OBJECT;
 
@@ -33,7 +35,7 @@ class Table : public QTableWidget {
 		QStringList labels;
 
 		// Colours for packets
-		std::map<std::string, QColor> packet_colors = 
+		std::map<std::string, QColor> packet_colors =
 		{
 			{"random", QColor(0xc2, 0xff, 0xeb)},
 			{"tcp", QColor(0x99, 0xc2, 0x4d)}

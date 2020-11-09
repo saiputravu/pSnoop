@@ -58,7 +58,7 @@ void Table::append(QStringList items) {
 
 		// Set background colour
 		if (this->rowCount() & 1)
-			this->item(this->rowCount() - 1, i)->setBackground(packet_colors["random"]);
+			this->item(this->rowCount() - 1, i)->setBackground(this->packet_colors["random"]);
 	}
 }
 
