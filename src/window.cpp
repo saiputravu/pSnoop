@@ -1,23 +1,43 @@
 #include "window.hpp"
 
-Window::Window(QWidget *parent) : QWidget(parent) {
-	this->init();
+Window::Window(QWidget *parent) : QMainWindow(parent) {
+	this->init_general();
+	this->init_menu();
+	this->init_layout();
 }
 
 Window::~Window() {
 
 }
 
-void Window::init() {
+void Window::init_general() {
+	// General Window Settings
 	this->resize(QDesktopWidget().availableGeometry(this).size() * 0.7);
+	this->setMinimumSize(300, 300);
+	this->setWindowTitle("pSnoopGUI - Sai");
+}
 
-	// Overall container
+void Window::init_menu() {
+	// File Menu Actions
+	// File Menu
+	this->file_menu = this->menuBar()->addMenu(QString("&File"));
+	
+	// Help Menu Actions
+	// Help Menu
+	this->help_menu = this->menuBar()->addMenu(QString("&Help"));
+
+}
+
+void Window::init_layout() {
+
+	// Overall container	
+	this->main_widget = new QWidget(this);
+	this->main_widget->move(0, 15);
+	this->main_widget->setFixedSize(this->width(), this->height() - 15);
 	this->container = new QVBoxLayout;
 
-	// Horizontal splitter
+	// Splitters / Dividers
 	this->h_splitter = new QSplitter(Qt::Vertical, this);
-
-	// Vertical splitter 
 	this->v_splitter = new QSplitter(Qt::Horizontal, this);
 
 	// Packet table object
@@ -42,7 +62,8 @@ void Window::init() {
 
 	// Putting them together 
 	this->container->addWidget(v_splitter);
-	this->setLayout(container);
+	this->main_widget->setLayout(container);
+	
 
 	QStringList a;
 	a << "1"
@@ -58,6 +79,9 @@ void Window::init() {
 
 void Window::resizeEvent(QResizeEvent *event) {
 	
+	// Resize everything on window resize event
+	this->main_widget->setFixedSize(this->width(), this->height() - 15);
+
 	// Call normal procedure
 	QWidget::resizeEvent(event);
 }
