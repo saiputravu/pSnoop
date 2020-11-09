@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QDesktopWidget>
 #include <QResizeEvent>
+#include <QSplitter>
+#include <QVBoxLayout>
+#include <QPushButton>
 
 #include "table.hpp"
 
@@ -20,6 +23,9 @@ class Window : public QWidget {
 	private:
 		// Properties
 		Table *packet_table;
+		QSplitter *h_splitter;
+		QSplitter *v_splitter;
+		QVBoxLayout* container;
 
 		// Methods
 		void init();

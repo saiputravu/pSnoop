@@ -1,9 +1,8 @@
 #include "table.hpp"
 
 Table::Table(QWidget *parent, 
-		unsigned width, unsigned height,
 		unsigned int x, unsigned int y,
-		unsigned row_height) : height(height), width(width){
+		unsigned row_height) : QTableWidget(parent) {
 	this->labels << "Frame"
 		<< "Time"
 		<< "Destination" 
@@ -11,28 +10,32 @@ Table::Table(QWidget *parent,
 		<< "Protocol"
 		<< "Information";
 
-	this->table = new QTableWidget(parent);
-	this->table->setRowCount(0);
-	this->table->setColumnCount(this->labels.count());
+	// this->table = new QTableWidget(parent);
+	this->setRowCount(0);
+	this->setColumnCount(this->labels.count());
 
 	// Set labels 
-	this->table->setHorizontalHeaderLabels(this->labels);
+	this->setHorizontalHeaderLabels(this->labels);
 
 	// Set sorting enabled
-	this->table->setSortingEnabled(true);
+	this->setSortingEnabled(true);
 
-	// Resize table
-	this->table->setFixedSize(width, height);
+	// Resize table and set resizeable
+	// this->resize();
+	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	// Set row height
-	this->table->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-	this->table->verticalHeader()->setDefaultSectionSize(row_height);
+	this->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+	this->verticalHeader()->setDefaultSectionSize(row_height);
 
 	// Resizing column widths
-	this->table->horizontalHeader()->setStretchLastSection(true);
+	this->horizontalHeader()->setStretchLastSection(true);
 
 	// Hide left column
-	this->table->verticalHeader()->setVisible(false);
+	this->verticalHeader()->setVisible(false);
+
+	// Set selection behaviour to rows
+	this->setSelectionBehavior(QAbstractItemView::SelectRows);
 }
 
 Table::~Table() {
@@ -44,15 +47,18 @@ void Table::append(QStringList items) {
 		return;
 	
 	// Add new row
-	this->table->insertRow(this->table->rowCount());
+	this->insertRow(this->rowCount());
 	for (int i = 0; i < items.count(); ++i) {
 		// Set each respective item
-		this->table->setItem(this->table->rowCount() - 1, i,
+		this->setItem(this->rowCount() - 1, i,
 				new QTableWidgetItem(items.at(i)));
+		
+		// Set Cell as Read-Only
+		this->item(this->rowCount() - 1, i)->setFlags(this->item(this->rowCount() - 1, i)->flags() ^ Qt::ItemIsEditable);
 
 		// Set background colour
-		if (this->table->rowCount() & 1)
-			this->table->item(this->table->rowCount() - 1, i)->setBackground(QColor(0xc2, 0xff, 0xeb));
+		if (this->rowCount() & 1)
+			this->item(this->rowCount() - 1, i)->setBackground(packet_colors["random"]);
 	}
 }
 

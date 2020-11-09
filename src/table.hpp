@@ -4,34 +4,40 @@
 #include <QWidget>
 #include <QTableWidget>
 #include <QTableWidgetItem>
+#include <QAbstractItemView>
 #include <QHeaderView>
+#include <QSizePolicy>
 #include <QStringList>
 #include <QString>
 #include <QColor>
 
-class Table : public QWidget {
+#include <map>
+#include <string>
+
+class Table : public QTableWidget {
 	Q_OBJECT;
 
 	public:
 		Table(QWidget *parent, 
-				unsigned width, unsigned height, 
 				unsigned int x = 0, unsigned int y = 0, 
 				unsigned row_height = 10);
 		~Table();
 
 		// Getters 
-		QTableWidget *get_table() { return this->table; }	
 		QStringList get_labels() { return this->labels; }
-		unsigned int get_width() { return this->width; }
-		unsigned int get_height() { return this->height; }
 
 		void append(QStringList items);
 
 	private:
-		QTableWidget *table;
+		// Properties
 		QStringList labels;
 
-		unsigned int width, height;
+		// Colours for packets
+		std::map<std::string, QColor> packet_colors = 
+		{
+			{"random", QColor(0xc2, 0xff, 0xeb)},
+			{"tcp", QColor(0x99, 0xc2, 0x4d)}
+		};
 
 	signals:
 
