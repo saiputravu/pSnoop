@@ -41,10 +41,12 @@ class Window : public QMainWindow {
 		Settings *settings;
 
 		Table *packet_table;
+		HexView *hex_view;
 		QSplitter *h_splitter;
 		QSplitter *v_splitter;
 		QVBoxLayout *container;
 		QWidget *main_widget;
+		QWidget *left_restrictor;
 
 		// General Methods
 		void init_general();

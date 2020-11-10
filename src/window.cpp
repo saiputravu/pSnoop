@@ -184,7 +184,9 @@ void Window::init_layout() {
 	this->packet_table = new Table(this);
 
 	// HexView object
-	HexView *hex_view = new HexView(this);
+	this->hex_view = new HexView(this);
+	this->hex_view->setMaximumSize(this->hex_view->get_cell_width() * (8 + 6),
+			this->height()+4000);
 
 	// Place holders 
 	QPushButton *button = new QPushButton(this);
@@ -204,7 +206,6 @@ void Window::init_layout() {
 	// Putting them together 
 	this->container->addWidget(v_splitter);
 	this->main_widget->setLayout(container);
-	
 
 	QStringList a;
 	a << "1"

@@ -4,16 +4,32 @@
 #include <QWidget>
 #include <QTableWidget>
 #include <QTableWidgetItem>
-#include <QAbstractScrollArea>
+#include <QHeaderView>
+#include <QAbstractItemView>
+#include <QColor>
+#include <QDebug>
 
-class HexView : public QAbstractScrollArea {
+#include <stdio.h>
+#include <map>
+#include <iostream>
+
+class HexView : public QTableWidget {
 	Q_OBJECT;
 
 	public:
-		HexView(QWidget *parent = nullptr);
+		HexView(QWidget *parent = nullptr, 
+				int cell_width = 23);
 		~HexView();
 
+		// Getters 
+		int get_cell_width() { return this->cell_width; }
+
+		// Be careful of usage, this could lead to overflows
+		void load_bytes(char *bytes, int len);
+
 	private:
+		int cell_width;
+		QTableWidgetItem *proto_item;
 
 	signals:
 	
