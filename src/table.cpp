@@ -20,6 +20,9 @@ Table::Table(QWidget *parent,
 	// Set sorting enabled
 	this->setSortingEnabled(true);
 
+	// Set dividers to invisible
+	this->setShowGrid(false);
+
 	// Resize table and set resizeable
 	// this->resize();
 	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -36,6 +39,7 @@ Table::Table(QWidget *parent,
 
 	// Set selection behaviour to rows
 	this->setSelectionBehavior(QAbstractItemView::SelectRows);
+
 }
 
 Table::~Table() {
@@ -61,4 +65,3 @@ void Table::append(QStringList items) {
 			this->item(this->rowCount() - 1, i)->setBackground(this->packet_colors["random"]);
 	}
 }
-

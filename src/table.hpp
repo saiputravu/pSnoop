@@ -2,6 +2,7 @@
 #define TABLE_H
 
 #include <QWidget>
+#include <QScrollArea>
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QAbstractItemView>
@@ -20,7 +21,7 @@ class Table : public QTableWidget {
 	Q_OBJECT;
 
 	public:
-		Table(QWidget *parent, 
+		Table(QWidget *parent = nullptr, 
 				unsigned int x = 0, unsigned int y = 0, 
 				unsigned row_height = 10);
 		~Table();

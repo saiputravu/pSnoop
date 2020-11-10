@@ -64,7 +64,7 @@ void Window::init_menu() {
 	this->connect(this->quit_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::on_exit);
 
 	// File Menu
 	this->file_menu = this->menuBar()->addMenu(QString("&File"));
@@ -183,13 +183,14 @@ void Window::init_layout() {
 	// Packet table object
 	this->packet_table = new Table(this);
 
+	// HexView object
+	HexView *hex_view = new HexView(this);
+
 	// Place holders 
 	QPushButton *button = new QPushButton(this);
 	button->setText("HelloWorld");
 	QPushButton *button2 = new QPushButton(this);
 	button2->setText("HelloWorld2");
-	QPushButton *button3 = new QPushButton(this);
-	button3->setText("HelloWorld3");
 	
 	// Right hand side
 	this->h_splitter->addWidget(this->packet_table);
@@ -197,7 +198,7 @@ void Window::init_layout() {
 	this->h_splitter->addWidget(button2);
 
 	// Left hand side
-	this->v_splitter->addWidget(button3);
+	this->v_splitter->addWidget(hex_view);
 	this->v_splitter->addWidget(h_splitter);
 
 	// Putting them together 
@@ -281,4 +282,9 @@ void Window::about() {
 	pop_up->setLayout(container);
 
 	pop_up->show();
+}
+
+void Window::on_exit() {
+	// Implement a prompt to save work 
+	QApplication::exit();
 }

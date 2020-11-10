@@ -21,9 +21,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # Input
 HEADERS += window.hpp \
 	table.hpp \ 
-	settings.hpp
+	hexview.hpp \
+	settings.hpp 
 
 SOURCES += main.cpp \
 	window.cpp \
 	table.cpp \
-	settings.cpp
+	hexview.cpp \
+	settings.cpp 

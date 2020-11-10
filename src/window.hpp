@@ -17,12 +17,14 @@
 #include <QKeySequence>
 #include <QLabel>
 #include <QFont>
+#include <QScrollArea>
 
 #include <iostream>
 #include <stdio.h>
 
 #include "table.hpp"
 #include "settings.hpp"
+#include "hexview.hpp"
 
 class Window : public QMainWindow {
 	Q_OBJECT;
@@ -77,13 +79,14 @@ class Window : public QMainWindow {
 
 		// Help Menu Actions
 		QAction *about_action;
-		void about();
 		
 	signals:
 
 	private slots:
 		// Menu Slots
 		void not_implemented();
+		void about();
+		void on_exit();
 
 };
 
