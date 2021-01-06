@@ -185,9 +185,9 @@ void Window::init_layout() {
 
 	// HexView object
 	this->hex_view = new HexView(this);
-	this->hex_view->setMaximumSize(this->hex_view->get_cell_width() * (8 + 6),
+	this->hex_view->setMaximumSize(this->hex_view->get_cell_width() * (8 + 7),
 			this->height()+4000);
-
+	
 	// Place holders 
 	QPushButton *button = new QPushButton(this);
 	button->setText("HelloWorld");
