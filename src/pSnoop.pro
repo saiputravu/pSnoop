@@ -22,10 +22,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 HEADERS += window.hpp \
 	table.hpp \ 
 	hexview.hpp \
-	settings.hpp 
+	settings.hpp \
+	capture/networking.hpp \
+	capture/packet.hpp \
+	capture/protocols.hpp \
+	capture/Utils/error.hpp \
+	capture/Utils/utils.hpp 
 
 SOURCES += main.cpp \
 	window.cpp \
 	table.cpp \
 	hexview.cpp \
-	settings.cpp 
+	settings.cpp \
+	capture/networking.cpp \
+	capture/packet.cpp \
+	capture/Utils/error.cpp 

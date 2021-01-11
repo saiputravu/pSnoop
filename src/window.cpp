@@ -7,7 +7,7 @@ Window::Window(QWidget *parent) : QMainWindow(parent) {
 }
 
 Window::~Window() {
-
+	
 }
 
 void Window::init_general() {
