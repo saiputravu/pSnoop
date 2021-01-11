@@ -5,7 +5,12 @@
 Packet::Packet(int frame, 
 		struct pcap_pkthdr header, 
 		unsigned char *data,
-		std::string prot) : frame(frame), protocol(prot) {
+		struct ether_header *e_header,
+		struct ip_header *i_header,
+		std::string prot) : frame(frame), 
+	protocol(prot), 
+	ether_header(e_header), 
+	ip_header(i_header) {
 
 
 	// Allocate heap space for header struct and set address as data
@@ -45,7 +50,8 @@ PacketStream::PacketStream() {
 }
 
 PacketStream::~PacketStream() {
-
+	for (unsigned int i = 0; i < this->packet_stream.size(); ++i) 
+		delete this->packet_stream[i];
 }
 
 void PacketStream::push_back(int frame, 
@@ -61,36 +67,36 @@ void PacketStream::push_back(int frame,
 		// Ensure Type == 4 && HeLen == 5 otherwise we don't deal with typical data
 		switch(i_header->protocol) {
 			case ICMP:
-				pkt = new ICMPPacket(frame, header, data);
+				pkt = new ICMPPacket(frame, header, data, e_header, i_header);
 				break;
 			case TCP:
-				pkt = new TCPPacket(frame, header, data);
+				pkt = new TCPPacket(frame, header, data, e_header, i_header);
 				break;
 			case UDP:
-				pkt = new UDPPacket(frame, header, data);
+				pkt = new UDPPacket(frame, header, data, e_header, i_header);
 				break;
 			default:
-				pkt = new IPPacket(frame, header, data);	
+				pkt = new IPPacket(frame, header, data, e_header, i_header);
 				break;
 		}
 
 	} else if (htons(e_header->type) == ETHERTYPE_ARP) {
-		pkt = new ARPPacket(frame, header, data);
+		pkt = new ARPPacket(frame, header, data, e_header, i_header);
 	} else
-		pkt = new Packet(frame, header, data);	// Create new unknown packet object
+		pkt = new Packet(frame, header, data, e_header, i_header);	// Create new unknown packet object
 
 	this->packet_stream.push_back(pkt);				// Add pointer to the end of stream
-	printf("Type: %d\n", (i_header->type_helen & 0xf0)>>4);
-	printf("HeLen: %d\n", i_header->type_helen & 0x0f);
-	printf("Packet Length: %d or 0x%x\n",
-			i_header->len,
-			i_header->len);
-	printf("Time To Live: %d\n", i_header->ttl);
-	printf("Protocol: 0x%02x | %s\n", i_header->protocol, pkt->get_protocol().c_str());
-	printf("Checksum: 0x%04x\n", i_header->checksum);
-	std::cout << "Source i: " << Utils::convert_ip(i_header->source) << std::endl;
-	std::cout << "Dest   i: " << Utils::convert_ip(i_header->dest) << std::endl;
-
-	std::cout << "Protocol: " << pkt->get_protocol() << std::endl;
+	//printf("Type: %d\n", (i_header->type_helen & 0xf0)>>4);
+	//printf("HeLen: %d\n", i_header->type_helen & 0x0f);
+	//printf("Packet Length: %d or 0x%x\n",
+	//        i_header->len,
+	//        i_header->len);
+	//printf("Time To Live: %d\n", i_header->ttl);
+	//printf("Protocol: 0x%02x | %s\n", i_header->protocol, pkt->get_protocol().c_str());
+	//printf("Checksum: 0x%04x\n", i_header->checksum);
+	//std::cout << "Source i: " << Utils::convert_ip(i_header->source) << std::endl;
+	//std::cout << "Dest   i: " << Utils::convert_ip(i_header->dest) << std::endl;
+    //
+	//std::cout << "Protocol: " << pkt->get_protocol() << std::endl;
 }
 

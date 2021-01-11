@@ -16,8 +16,10 @@ class Packet {
 		Packet(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
+				struct ether_header *e_header,
+				struct ip_header *i_header,
 				std::string prot = "UNKNOWN");
-		~Packet();
+		virtual ~Packet();
 
 		// Getters
 		int get_frame() { return this->frame; }
@@ -59,7 +61,10 @@ class IPPacket : public Packet {
 
 		IPPacket(int frame,
 				struct pcap_pkthdr header,
-				unsigned char *data) : Packet(frame, header, data, "IP") {
+				unsigned char *data, 
+				struct ether_header *e_header,
+				struct ip_header *i_header
+				) : Packet(frame, header, data, e_header, i_header, "IP") {
 
 		}
 
@@ -73,7 +78,10 @@ class ICMPPacket : public Packet {
 
 		ICMPPacket(int frame,
 				struct pcap_pkthdr header,
-				unsigned char *data) : Packet(frame, header, data, "ICMP") {
+				unsigned char *data,
+				struct ether_header *e_header,
+				struct ip_header *i_header
+				) : Packet(frame, header, data, e_header, i_header, "ICMP") {
 
 		}
 
@@ -87,7 +95,10 @@ class TCPPacket : public Packet {
 
 		TCPPacket(int frame,
 				struct pcap_pkthdr header,
-				unsigned char *data) : Packet(frame, header, data, "TCP") {
+				unsigned char *data,
+				struct ether_header *e_header,
+				struct ip_header *i_header
+				) : Packet(frame, header, data, e_header, i_header, "TCP") {
 
 		}
 
@@ -101,7 +112,10 @@ class UDPPacket : public Packet {
 
 		UDPPacket(int frame,
 				struct pcap_pkthdr header,
-				unsigned char *data) : Packet(frame, header, data, "UDP") {
+				unsigned char *data,
+				struct ether_header *e_header,
+				struct ip_header *i_header
+				) : Packet(frame, header, data, e_header, i_header, "UDP") {
 
 		}
 
@@ -115,7 +129,10 @@ class ARPPacket : public Packet {
 
 		ARPPacket(int frame,
 				struct pcap_pkthdr header,
-				unsigned char *data) : Packet(frame, header, data, "ARP") {
+				unsigned char *data,
+				struct ether_header *e_header,
+				struct ip_header *i_header
+				) : Packet(frame, header, data, e_header, i_header, "ARP") {
 
 		}
 
