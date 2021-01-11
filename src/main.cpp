@@ -17,14 +17,15 @@ int main() {
 	std::cout << "\tNetmask: " << Utils::convert_bpf(capture.get_netmask()) << std::endl;
 
 	// Setup and start listening (specify count to set how many to capture)
+	const int count = 1;
 	capture.set_filter((const char *)"port 53");
-	capture.start_listening(100);
+	capture.start_listening(count);
 
 	// Displaying packets
-	for (int i = 0; i < 100; ++i) {
+	for (int i = 0; i < count; ++i) {
 		Packet *pkt = (*(PacketStream *)capture.get_packet_stream())[i];
 		if (pkt == 0) {
-			printf("Error on packet [%d] [0x%x]\n", i, pkt);
+			printf("Error on packet [%d] [0x%p]\n", i, pkt);
 			return -1;
 		}
 		std::cout << "[" << pkt->get_frame() << "] Packet Captured" << std::endl;

@@ -1,3 +1,6 @@
+#ifndef ERROR_H
+#define ERROR_H
+
 #include <iostream>
 #include <cstdio>
 #include <execinfo.h>
@@ -18,4 +21,4 @@ class Error {
 
 };
 
-
+#endif // ERROR_H

@@ -56,4 +56,4 @@ class Networking {
 		PacketStream *packet_stream = new PacketStream();	// Stream / List of all captured packet objects
 };
 
-#endif
+#endif // NETWORKING_H

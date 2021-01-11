@@ -4,9 +4,12 @@
 #include <pcap.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 #include <sys/time.h>
 #include <vector>
+#include <arpa/inet.h>
 
+#include "protocols.hpp"
 
 class Packet {
 	public:
@@ -21,15 +24,30 @@ class Packet {
 		time_t get_header_timestamp() { return this->header->ts.tv_sec; }
 		unsigned char *get_data() { return this->data; }
 		unsigned char *get_packet() { return this->data; }
+		struct ether_header *get_ether_header() { return this->ether_header; }
+		struct ip_header *get_ip_header() { 
+			if (this->ip_header)
+				return this->ip_header;
+			return nullptr;
+		}
 
 		// Setters
 
 	private:
+		// Methods
+		void parse();
+
 		// Properties
 
 		int frame = -1;							// Position packet received
 		struct pcap_pkthdr *header = nullptr; 	// Pointer to packet header struct
 		unsigned char *data = nullptr;			// Pointer to packet data 
+
+		struct ether_header *ether_header;
+		struct ip_header *ip_header;
+
+		std::string protocol = "";				// Protocol Type
+		std::string info = "";					// Extra information filled at instantiation
 
 };
 
@@ -57,4 +75,4 @@ class PacketStream {
 
 };
 
-#endif
+#endif // PACKET_H

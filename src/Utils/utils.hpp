@@ -56,6 +56,14 @@ class Utils {
 			return stream.str();
 		}
 
+		static std::string convert_ip(unsigned int ip) {
+			std::string addr = "";
+			addr += std::to_string((ip & 0xff000000) >> (6 * 4)) + '.';
+			addr += std::to_string((ip & 0xff0000) >> (4 * 4)) + '.';
+			addr += std::to_string((ip & 0xff00) >> (2 * 4)) + '.';
+			addr += std::to_string(ip & 0xff);
+			return addr;
+		}
 };
 
-#endif
+#endif // UTILS_H
