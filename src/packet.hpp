@@ -15,7 +15,8 @@ class Packet {
 	public:
 		Packet(int frame,
 				struct pcap_pkthdr header,
-				unsigned char *data);
+				unsigned char *data,
+				std::string prot = "UNKNOWN");
 		~Packet();
 
 		// Getters
@@ -24,6 +25,8 @@ class Packet {
 		time_t get_header_timestamp() { return this->header->ts.tv_sec; }
 		unsigned char *get_data() { return this->data; }
 		unsigned char *get_packet() { return this->data; }
+		std::string get_protocol() { return this->protocol; }
+		std::string get_info() { return this->info; }
 		struct ether_header *get_ether_header() { return this->ether_header; }
 		struct ip_header *get_ip_header() { 
 			if (this->ip_header)
@@ -35,7 +38,7 @@ class Packet {
 
 	private:
 		// Methods
-		void parse();
+		virtual void parse();
 
 		// Properties
 
@@ -49,6 +52,76 @@ class Packet {
 		std::string protocol = "";				// Protocol Type
 		std::string info = "";					// Extra information filled at instantiation
 
+};
+
+class IPPacket : public Packet {
+	public:
+
+		IPPacket(int frame,
+				struct pcap_pkthdr header,
+				unsigned char *data) : Packet(frame, header, data, "IP") {
+
+		}
+
+		~IPPacket() {} 
+
+	private:
+};
+
+class ICMPPacket : public Packet {
+	public:
+
+		ICMPPacket(int frame,
+				struct pcap_pkthdr header,
+				unsigned char *data) : Packet(frame, header, data, "ICMP") {
+
+		}
+
+		~ICMPPacket() {} 
+
+	private:
+};
+
+class TCPPacket : public Packet {
+	public:
+
+		TCPPacket(int frame,
+				struct pcap_pkthdr header,
+				unsigned char *data) : Packet(frame, header, data, "TCP") {
+
+		}
+
+		~TCPPacket() {} 
+
+	private:
+};
+
+class UDPPacket : public Packet {
+	public:
+
+		UDPPacket(int frame,
+				struct pcap_pkthdr header,
+				unsigned char *data) : Packet(frame, header, data, "UDP") {
+
+		}
+
+		~UDPPacket() {} 
+
+	private:
+};
+
+class ARPPacket : public Packet {
+	public:
+
+		ARPPacket(int frame,
+				struct pcap_pkthdr header,
+				unsigned char *data) : Packet(frame, header, data, "ARP") {
+
+		}
+
+		~ARPPacket() {} 
+
+	private:
 };
 
 class PacketStream {

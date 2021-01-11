@@ -18,7 +18,7 @@ int main() {
 
 	// Setup and start listening (specify count to set how many to capture)
 	const int count = 1;
-	capture.set_filter((const char *)"port 53");
+	//capture.set_filter((const char *)"port 53");
 	capture.start_listening(count);
 
 	// Displaying packets
@@ -28,6 +28,7 @@ int main() {
 			printf("Error on packet [%d] [0x%p]\n", i, pkt);
 			return -1;
 		}
+		std::cout << std::endl;
 		std::cout << "[" << pkt->get_frame() << "] Packet Captured" << std::endl;
 		std::cout << "\t[-] Length: " << pkt->get_header_len() << std::endl;
 		std::cout << "\t[-] Time  : " << Utils::convert_time(pkt->get_header_timestamp()) << std::endl;

@@ -17,7 +17,6 @@ struct ether_header {
 
 // http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 #define ICMP	1
-#define IPv4	4
 #define TCP		6
 #define UDP		17
 
