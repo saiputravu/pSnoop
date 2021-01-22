@@ -8,8 +8,11 @@ Networking::Networking() {
 
 Networking::~Networking() {
 	// Free all the allocated memory, prevent a memory leak
-	pcap_freealldevs(this->devices[0]);
-	pcap_close(this->handle);
+	if (this->devices[0])
+		pcap_freealldevs(this->devices[0]);
+	
+	if (this->handle)
+		pcap_close(this->handle);
 }
 
 bool Networking::set_subnet_netmask() {

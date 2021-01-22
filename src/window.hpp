@@ -8,6 +8,7 @@
 #include <QResizeEvent>
 #include <QSplitter>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QPushButton>
 #include <QContextMenuEvent>
 #include <QMenu>
@@ -18,6 +19,10 @@
 #include <QLabel>
 #include <QFont>
 #include <QScrollArea>
+#include <QListWidget>
+#include <QSignalMapper>
+
+#include <QDebug>
 
 #include <iostream>
 #include <stdio.h>
@@ -25,6 +30,7 @@
 #include "table.hpp"
 #include "settings.hpp"
 #include "hexview.hpp"
+#include "capture/networking.hpp"
 
 class Window : public QMainWindow {
 	Q_OBJECT;
@@ -47,6 +53,8 @@ class Window : public QMainWindow {
 		QVBoxLayout *container;
 		QWidget *main_widget;
 		QWidget *left_restrictor;
+		
+		Networking capture;	// Object for networking side of application
 
 		// General Methods
 		void init_general();
@@ -90,6 +98,9 @@ class Window : public QMainWindow {
 		void about();
 		void on_exit();
 
+		// Capture Menu Slots
+		void select_interface();
+		void select_interface_button(QWidget *list);
 };
 
 #endif // WINDOW_H

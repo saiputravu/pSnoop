@@ -110,7 +110,7 @@ void Window::init_menu() {
 	this->connect(this->select_interface_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::select_interface);
 	
 	this->start_action = new QAction("&Begin Capture", this);
 	this->start_action->setShortcut(QKeySequence("Ctrl+b"));
@@ -149,6 +149,7 @@ void Window::init_menu() {
 	
 	// Capture Menu
 	this->capture_menu = this->menuBar()->addMenu(QString("&Capture"));
+	this->capture_menu->addAction(select_interface_action);
 	this->capture_menu->addAction(capture_filter_action);
 	this->capture_menu->addAction(statistics_action);
 	this->capture_menu->addSeparator();
@@ -185,10 +186,10 @@ void Window::init_layout() {
 
 	// HexView object
 	this->hex_view = new HexView(this);
-	this->hex_view->setMaximumSize(this->hex_view->get_cell_width() * (8 + 7),
+	this->hex_view->setMaximumSize(hex_view->get_cell_width() * (8 + 7),
 			this->height()+4000);
 	
-	// Place holders 
+	// Place holder, e_header, i_headers 
 	QPushButton *button = new QPushButton(this);
 	button->setText("HelloWorld");
 	QPushButton *button2 = new QPushButton(this);
@@ -250,6 +251,46 @@ void Window::not_implemented() {
 	pop_up->setLayout(container);
 	
 	pop_up->show();
+}
+
+void Window::select_interface() {
+
+	// Window setup
+	QWidget *pop_up = new QWidget();
+	pop_up->setMinimumSize(400,200);
+	
+	// List of interfaces setup
+	QListWidget *list = new QListWidget();
+	int i = 0;
+	while (this->capture.get_device(i)) {
+		new QListWidgetItem(this->capture.get_device(i)->name, list);
+		i++;
+	}
+	
+	// Select button 
+	QPushButton *select = new QPushButton("Select\nInterface");
+	select->setMinimumHeight(150);
+
+	QSignalMapper *sig_mapper = new QSignalMapper(pop_up);
+	this->connect(select, SIGNAL(clicked()), sig_mapper, SLOT(map()));
+	sig_mapper->setMapping(select, list);
+	this->connect(sig_mapper, SIGNAL(mapped(QWidget *)), this, SLOT(select_interface_button(QWidget *)));
+
+	// Layout setup
+	QHBoxLayout *layout = new QHBoxLayout(pop_up);
+	layout->addWidget(list);
+	layout->addWidget(select);
+
+	pop_up->show();
+}
+
+void Window::select_interface_button(QWidget *list) {
+	QListWidget *list_widget = (QListWidget *)list;
+	this->capture.setup_device(list_widget->currentRow());
+	QString title;
+	title.append(QString::fromLatin1("Interface : "));
+	title.append(QString::fromLatin1(this->capture.get_device(list_widget->currentRow())->name));
+	this->setWindowTitle(title);
 }
 
 void Window::about() {

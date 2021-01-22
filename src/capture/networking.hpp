@@ -18,7 +18,11 @@ class Networking {
 
 		// Getters
 		pcap_t *get_handle() { return this->handle; }
-		pcap_if_t *get_device(int index) { return this->devices[index]; }
+		pcap_if_t *get_device(int index) { 
+			if (index >= 0 && index < (int) this->devices.size())
+				return (this->devices)[index];
+			return nullptr;
+		}
 		char *get_cur_device() { return this->selected_device; }
 		bpf_u_int32 get_subnet() { return this->subnet; }
 		bpf_u_int32 get_netmask() { return this->netmask; }
@@ -45,7 +49,7 @@ class Networking {
 		// Properties
 		char errbuf[PCAP_ERRBUF_SIZE];		// Error buffer, holds last error
 
-		pcap_t *handle;						// pcap_t handle to the selected network interface
+		pcap_t *handle = nullptr;			// pcap_t handle to the selected network interface
 		std::vector<pcap_if_t *> devices;	// Current devices available on the computer
 
 		char *selected_device;		// String of the selected network interface
