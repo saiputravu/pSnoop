@@ -21,7 +21,7 @@ class Networking {
 		// Getters
 		pcap_t *get_handle() { return this->handle; }
 		pcap_if_t *get_device(int index) { 
-			if (index > 0 && index < (int) this->devices.size())
+			if (index >= 0 && index < (int) this->devices.size())
 				return this->devices[index];
 			return nullptr;
 		}
