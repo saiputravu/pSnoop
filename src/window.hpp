@@ -30,6 +30,7 @@
 #include "table.hpp"
 #include "settings.hpp"
 #include "hexview.hpp"
+#include "searchbox.hpp"
 #include "capture/networking.hpp"
 
 class Window : public QMainWindow {
@@ -55,11 +56,15 @@ class Window : public QMainWindow {
 		QWidget *left_restrictor;
 		
 		Networking capture;	// Object for networking side of application
+		bool capture_active = false;
 
 		// General Methods
 		void init_general();
 		void init_menu();
 		void init_layout();
+
+		// Threaded methods
+		void capture_packets();
 
 		// Menus
 		QMenu *file_menu;
@@ -101,6 +106,8 @@ class Window : public QMainWindow {
 		// Capture Menu Slots
 		void select_interface();
 		void select_interface_button(QWidget *list);
+		void begin_capture();
+		void capture_filter();
 };
 
 #endif // WINDOW_H

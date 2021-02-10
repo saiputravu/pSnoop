@@ -19,12 +19,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 # Required Libraries 
-LIBS = -lpcap 
+LIBS = -lpcap -L/usr/include/boost
+
+# Compiler Arguments
+CONFIG += c++17 strict_c++
+QMAKE_CXXFLAGS += -fconcepts
 
 # Input
 HEADERS += window.hpp \
 	table.hpp \ 
 	hexview.hpp \
+	searchbox.hpp \
 	settings.hpp \
 	capture/networking.hpp \
 	capture/packet.hpp \
@@ -36,6 +41,7 @@ SOURCES += main.cpp \
 	window.cpp \
 	table.cpp \
 	hexview.cpp \
+	searchbox.cpp \
 	settings.cpp \
 	capture/networking.cpp \
 	capture/packet.cpp \

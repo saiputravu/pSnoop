@@ -117,7 +117,7 @@ void Window::init_menu() {
 	this->connect(this->start_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::begin_capture);
 	
 	this->stop_action = new QAction("&End Capture", this);
 	this->stop_action->setShortcut(QKeySequence("Ctrl+e"));
@@ -138,7 +138,7 @@ void Window::init_menu() {
 	this->connect(this->capture_filter_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::capture_filter);
 	 
 	this->statistics_action = new QAction("S&tatistics", this);
 	this->statistics_action->setStatusTip("Open protocol statistics");
@@ -190,8 +190,7 @@ void Window::init_layout() {
 			this->height()+4000);
 	
 	// Place holder, e_header, i_headers 
-	QPushButton *button = new QPushButton(this);
-	button->setText("HelloWorld");
+	SearchBox *button = new SearchBox(this);
 	QPushButton *button2 = new QPushButton(this);
 	button2->setText("HelloWorld2");
 	
@@ -291,6 +290,21 @@ void Window::select_interface_button(QWidget *list) {
 	title.append(QString::fromLatin1("Interface : "));
 	title.append(QString::fromLatin1(this->capture.get_device(list_widget->currentRow())->name));
 	this->setWindowTitle(title);
+}
+
+void Window::capture_filter() {	
+	QWidget *pop_up = new QWidget();
+	pop_up->show();
+}
+
+void Window::begin_capture() {
+	this->capture_active = true;
+}
+
+void Window::capture_packets() {
+	//while (this->capture_active)
+		
+	return;
 }
 
 void Window::about() {
