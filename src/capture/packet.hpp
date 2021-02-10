@@ -10,6 +10,8 @@
 #include <arpa/inet.h>
 
 #include "protocols.hpp"
+#include "Utils/error.hpp"
+#include "Utils/utils.hpp"
 
 class Packet {
 	public:
@@ -18,6 +20,7 @@ class Packet {
 				unsigned char *data,
 				struct ether_header *e_header,
 				struct ip_header *i_header,
+				unsigned char error_type = Error::CLI,
 				std::string prot = "UNKNOWN");
 		virtual ~Packet();
 
@@ -53,6 +56,7 @@ class Packet {
 
 		std::string protocol = "";				// Protocol Type
 		std::string info = "";					// Extra information filled at instantiation
+		unsigned char error_type;
 
 };
 
@@ -63,8 +67,9 @@ class IPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data, 
 				struct ether_header *e_header,
-				struct ip_header *i_header
-				) : Packet(frame, header, data, e_header, i_header, "IP") {
+				struct ip_header *i_header,
+				unsigned char error_type = Error::CLI
+				) : Packet(frame, header, data, e_header, i_header, error_type, "IP") {
 
 		}
 
@@ -80,8 +85,9 @@ class ICMPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data,
 				struct ether_header *e_header,
-				struct ip_header *i_header
-				) : Packet(frame, header, data, e_header, i_header, "ICMP") {
+				struct ip_header *i_header,
+				unsigned char error_type = Error::CLI
+				) : Packet(frame, header, data, e_header, i_header, error_type, "ICMP") {
 
 		}
 
@@ -97,8 +103,9 @@ class TCPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data,
 				struct ether_header *e_header,
-				struct ip_header *i_header
-				) : Packet(frame, header, data, e_header, i_header, "TCP") {
+				struct ip_header *i_header,
+				unsigned char error_type = Error::CLI
+				) : Packet(frame, header, data, e_header, i_header, error_type, "TCP") {
 
 		}
 
@@ -114,8 +121,9 @@ class UDPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data,
 				struct ether_header *e_header,
-				struct ip_header *i_header
-				) : Packet(frame, header, data, e_header, i_header, "UDP") {
+				struct ip_header *i_header,
+				unsigned char error_type = Error::CLI
+				) : Packet(frame, header, data, e_header, i_header, error_type, "UDP") {
 
 		}
 
@@ -131,8 +139,9 @@ class ARPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data,
 				struct ether_header *e_header,
-				struct ip_header *i_header
-				) : Packet(frame, header, data, e_header, i_header, "ARP") {
+				struct ip_header *i_header,
+				unsigned char error_type = Error::CLI
+				) : Packet(frame, header, data, e_header, i_header, error_type, "ARP") {
 
 		}
 
@@ -143,7 +152,7 @@ class ARPPacket : public Packet {
 
 class PacketStream {
 	public:
-		PacketStream();
+		PacketStream(unsigned char error_type = Error::CLI);
 		~PacketStream();
 
 		// Getters
@@ -162,6 +171,7 @@ class PacketStream {
 		// Properties 
 
 		std::vector<Packet *> packet_stream;	// List of captured packet objects 
+		unsigned char error_type;
 
 };
 
