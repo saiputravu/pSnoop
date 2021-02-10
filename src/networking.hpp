@@ -57,7 +57,7 @@ class Networking {
 		pcap_t *handle = nullptr;			// pcap_t handle to the selected network interface
 		std::vector<pcap_if_t *> devices;	// Current devices available on the computer
 
-		char *selected_device;		// String of the selected network interface
+		char *selected_device = "\0";		// String of the selected network interface
 		bpf_u_int32 subnet = 0;		// 32bit IP Subnet of selected network interface
 		bpf_u_int32 netmask = 0;	// 32bit Network Mask of the selected network interface
 
