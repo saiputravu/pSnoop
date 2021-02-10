@@ -1,29 +1,29 @@
 #include "packet.hpp"
-#include "Utils/error.hpp"
-#include "Utils/utils.hpp"
 
 Packet::Packet(int frame, 
 		struct pcap_pkthdr header, 
 		unsigned char *data,
 		struct ether_header *e_header,
 		struct ip_header *i_header,
+		unsigned char error_type,
 		std::string prot) : frame(frame), 
 	protocol(prot), 
 	ether_header(e_header), 
-	ip_header(i_header) {
+	ip_header(i_header), 
+	error_type(error_type) {
 
 
 	// Allocate heap space for header struct and set address as data
 	this->header = (struct pcap_pkthdr *)calloc(1, sizeof(struct pcap_pkthdr));
 	if (this->header == nullptr)
-		Error::handle_error((char *)"Error in allocating heap space for packet header.", Error::CLI, "Packet::Packet");
+		Error::handle_error((char *)"Error in allocating heap space for packet header.", this->error_type, "Packet::Packet");
 	else
 		*(this->header) = header;
 
 	// Allocate heap space for packet data and copy data into it
 	this->data = (unsigned char *)calloc(this->header->len, sizeof(char));
 	if (this->header == nullptr)
-		Error::handle_error((char *)"Error in allocating heap space for packet data.", Error::CLI, "Packet::Packet");
+		Error::handle_error((char *)"Error in allocating heap space for packet data.", this->error_type, "Packet::Packet");
 	else {
 		for (unsigned int i = 0; i < this->header->len; ++i)
 			this->data[i] = data[i];
@@ -45,7 +45,7 @@ void Packet::parse() {
 }
 
 
-PacketStream::PacketStream() {
+PacketStream::PacketStream(unsigned char error_type) : error_type(error_type) {
 
 }
 
@@ -67,16 +67,16 @@ void PacketStream::push_back(int frame,
 		// Ensure Type == 4 && HeLen == 5 otherwise we don't deal with typical data
 		switch(i_header->protocol) {
 			case ICMP:
-				pkt = new ICMPPacket(frame, header, data, e_header, i_header);
+				pkt = new ICMPPacket(frame, header, data, e_header, i_header, error_type);
 				break;
 			case TCP:
-				pkt = new TCPPacket(frame, header, data, e_header, i_header);
+				pkt = new TCPPacket(frame, header, data, e_header, i_header, error_type);
 				break;
 			case UDP:
-				pkt = new UDPPacket(frame, header, data, e_header, i_header);
+				pkt = new UDPPacket(frame, header, data, e_header, i_header, error_type);
 				break;
 			default:
-				pkt = new IPPacket(frame, header, data, e_header, i_header);
+				pkt = new IPPacket(frame, header, data, e_header, i_header, error_type);
 				break;
 		}
 
