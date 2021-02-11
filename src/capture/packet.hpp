@@ -1,6 +1,8 @@
 #ifndef PACKET_H
 #define PACKET_H
 
+#include <QObject>
+
 #include <pcap.h>
 #include <stdlib.h>
 #include <string.h>
@@ -150,7 +152,9 @@ class ARPPacket : public Packet {
 	private:
 };
 
-class PacketStream {
+class PacketStream : public QObject {
+	Q_OBJECT;
+
 	public:
 		PacketStream(unsigned char error_type = Error::CLI);
 		~PacketStream();
@@ -167,12 +171,20 @@ class PacketStream {
 				struct pcap_pkthdr header,
 				unsigned char *data);
 
+		void clear_packets() {
+			this->packet_stream.clear();
+		}
+
 	private:
 		// Properties 
 
 		std::vector<Packet *> packet_stream;	// List of captured packet objects 
 		unsigned char error_type;
 
+	signals:
+		void packet_recv(Packet *packet);
+
+	private slots:
 };
 
 #endif // PACKET_H

@@ -1,6 +1,7 @@
 #ifndef TABLE_H
 #define TABLE_H
 
+#include <QObject>
 #include <QWidget>
 #include <QScrollArea>
 #include <QTableWidget>
@@ -11,11 +12,13 @@
 #include <QStringList>
 #include <QString>
 #include <QColor>
+#include <QKeyEvent>
 
 #include <map>
 #include <string>
 
 #include "settings.hpp"
+#include "capture/packet.hpp"
 
 class Table : public QTableWidget {
 	Q_OBJECT;
@@ -32,6 +35,9 @@ class Table : public QTableWidget {
 		void append(QStringList items);
 
 	private:
+		// Methods
+		virtual void keyPressEvent(QKeyEvent *event);
+
 		// Properties
 		QStringList labels;
 
@@ -44,7 +50,11 @@ class Table : public QTableWidget {
 
 	signals:
 
-	private slots:
+	public slots:
+		void append_packet(Packet *packet);	// Connect this to a PacketStream signal
+												// Re-cast to Packet *, QSignalMapper only accepts QObject objects
+		
+
 };
 
 #endif // TABLE_H

@@ -26,6 +26,7 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <thread>
 
 #include "table.hpp"
 #include "settings.hpp"
@@ -57,14 +58,14 @@ class Window : public QMainWindow {
 		
 		Networking capture;	// Object for networking side of application
 		bool capture_active = false;
+		std::thread *capture_thread = nullptr;
 
 		// General Methods
 		void init_general();
 		void init_menu();
 		void init_layout();
-
-		// Threaded methods
-		void capture_packets();
+		void error_pop_up(std::string error,
+				std::string title = "Error");
 
 		// Menus
 		QMenu *file_menu;
@@ -107,7 +108,11 @@ class Window : public QMainWindow {
 		void select_interface();
 		void select_interface_button(QWidget *list);
 		void begin_capture();
+		void end_capture();
 		void capture_filter();
+
+		// Pane related slots
+		void load_packet_bytes(int row, int col);
 };
 
 #endif // WINDOW_H

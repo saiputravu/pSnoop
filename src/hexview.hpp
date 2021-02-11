@@ -7,6 +7,7 @@
 #include <QHeaderView>
 #include <QAbstractItemView>
 #include <QColor>
+#include <QString>
 #include <QDebug>
 
 #include <stdio.h>
@@ -33,7 +34,7 @@ class HexView : public QTableWidget {
 
 	signals:
 	
-	private slots:
+	public slots:
 };
 
 #endif // HEXVIEW_H

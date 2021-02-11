@@ -7,7 +7,13 @@ Window::Window(QWidget *parent) : QMainWindow(parent) {
 }
 
 Window::~Window() {
-	
+	if (this->capture_thread != nullptr) {
+		// Stop capture if it's active and join thread
+		this->capture_active = false;
+	}
+
+	// Kill application as you don't need it without main window open
+	QApplication::quit();
 }
 
 void Window::init_general() {
@@ -16,6 +22,7 @@ void Window::init_general() {
 	this->setMinimumSize(300, 300);
 	this->setWindowTitle("pSnoopGUI - Sai");
 
+	// Setup settings
 	this->settings = new Settings("pSnoop.cfg");
 
 	// Setting application wide font
@@ -30,6 +37,8 @@ void Window::init_general() {
 	}
 
 	QApplication::setFont(font);
+
+
 }
 
 void Window::init_menu() {
@@ -124,7 +133,7 @@ void Window::init_menu() {
 	this->connect(this->stop_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::end_capture);
 
 	this->restart_action = new QAction("&Restart Capture", this);
 	this->restart_action->setShortcut(QKeySequence("Ctrl+Shift+b"));
@@ -181,14 +190,20 @@ void Window::init_layout() {
 	this->h_splitter = new QSplitter(Qt::Vertical, this);
 	this->v_splitter = new QSplitter(Qt::Horizontal, this);
 
-	// Packet table object
+	// Packet table object & setup add new packet on receiving new packet
 	this->packet_table = new Table(this);
+	this->connect(this->capture.get_packet_stream(), &PacketStream::packet_recv,
+			this->packet_table, &Table::append_packet);
 
 	// HexView object
 	this->hex_view = new HexView(this);
 	this->hex_view->setMaximumSize(hex_view->get_cell_width() * (8 + 7),
 			this->height()+4000);
-	
+
+	// FIX THIS ISSUE
+	this->connect(this->packet_table, &Table::cellClicked,
+			this, &Window::load_packet_bytes);
+
 	// Place holder, e_header, i_headers 
 	SearchBox *button = new SearchBox(this);
 	QPushButton *button2 = new QPushButton(this);
@@ -207,16 +222,6 @@ void Window::init_layout() {
 	this->container->addWidget(v_splitter);
 	this->main_widget->setLayout(container);
 
-	QStringList a;
-	a << "1"
-		<< "Thurday idk"
-		<< "127.0.0.1"
-		<< "127.0.0.1"
-		<< "HTTP"
-		<< "GET HTTP/1.1  / ajsdaiowoiwdaoioidsspoaddasppkaso";
-	
-	for (int i = 0; i < 30; ++i)
-		this->packet_table->append(a);
 }
 
 void Window::resizeEvent(QResizeEvent *event) {
@@ -228,32 +233,8 @@ void Window::resizeEvent(QResizeEvent *event) {
 	QWidget::resizeEvent(event);
 }
 
-void Window::not_implemented() {
-	QFont local_font(this->settings->get("font"));
-	local_font.setPointSize(10);
-
-	QWidget *pop_up = new QWidget();
-	pop_up->resize(300, 50);
-	pop_up->setWindowTitle("Feature Not Implemented");
-
-	QVBoxLayout *container = new QVBoxLayout;
-	QLabel *label = new QLabel("This has not been implemented yet.");
-	label->setFont(local_font);
-
-	QPushButton *quit_button = new QPushButton();
-	quit_button->setText("Okay");
-	quit_button->setFont(local_font);
-	this->connect(quit_button, SIGNAL(clicked()), pop_up, SLOT(close()));
-
-	container->addWidget(label);
-	container->addWidget(quit_button);
-	pop_up->setLayout(container);
-	
-	pop_up->show();
-}
 
 void Window::select_interface() {
-
 	// Window setup
 	QWidget *pop_up = new QWidget();
 	pop_up->setMinimumSize(400,200);
@@ -284,6 +265,7 @@ void Window::select_interface() {
 }
 
 void Window::select_interface_button(QWidget *list) {
+	// Select interface in the networking object
 	QListWidget *list_widget = (QListWidget *)list;
 	this->capture.setup_device(list_widget->currentRow());
 	QString title;
@@ -298,13 +280,59 @@ void Window::capture_filter() {
 }
 
 void Window::begin_capture() {
-	this->capture_active = true;
+	if (this->capture_active) {
+		this->error_pop_up("Capture already active!");
+	} else if (strncmp("\0", this->capture.get_cur_device(), 1)) { // Check if interface selected
+		this->setWindowTitle(QString("Live Capturing: ") + QString(this->capture.get_cur_device()));
+		this->capture_active = true;
+		
+		// this->capture.get_packet_stream()->clear_packets();
+		// Create new thread in background in order to allow independant packet capture
+		capture_thread = new std::thread([this](auto a) { this->capture.start_listening(a); },
+			&this->capture_active);
+
+		// Continue thread execution independantly
+		this->capture_thread->detach();
+
+	} else {
+		this->error_pop_up ("Please select an interface first!");
+	}
 }
 
-void Window::capture_packets() {
-	//while (this->capture_active)
-		
-	return;
+void Window::end_capture () {
+	printf("Ending Capture\n");
+	this->capture_active = false;
+}
+
+void Window::load_packet_bytes(int row, int col) {	
+	int frame = this->packet_table->item(row, 0)->text().toInt();
+	Packet *pkt = (*this->capture.get_packet_stream())[frame];
+	this->hex_view->load_bytes((char*)pkt->get_data(), 
+			pkt->get_header_len());
+}
+
+void Window::error_pop_up (std::string error, std::string title) {
+	QFont local_font(this->settings->get("font"));
+	local_font.setPointSize(10);
+
+	QWidget *pop_up = new QWidget();
+	QVBoxLayout *container = new QVBoxLayout();
+	QLabel *label = new QLabel(pop_up);
+	QPushButton *button = new QPushButton(pop_up);
+
+	pop_up->setWindowTitle(QString::fromStdString(title));
+	label->setText(QString::fromStdString(error));
+	button->setText("Okay");
+	this->connect(button, SIGNAL(clicked()), pop_up, SLOT(close()));
+
+	container->addWidget(label);
+	container->addWidget(button);
+	pop_up->setLayout(container);
+	pop_up->show();
+}
+
+void Window::not_implemented() {
+	this->error_pop_up("This has not been implemented yet.", "Feature Not Implemented");
 }
 
 void Window::about() {

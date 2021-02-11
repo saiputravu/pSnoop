@@ -93,14 +93,16 @@ void Networking::start_listening(int max_count) {
 		// Increment successful packet count
 		this->packet_count++;
 	}
+	return;
 }
 
-void Networking::start_listening(bool &active) {
+void Networking::start_listening(bool *active) {
 	unsigned char *packet;
 	struct pcap_pkthdr header;
 
+	printf("Started Listening\n");
 	// Loop for every packet captured until conditions met 
-	while (active) {
+	while (*active) {
 		if (this->get_next_packet(&packet, &header) != 0) {
 			Error::handle_error((char *)"Unable to capture packet.", 
 					this->error_type), "Networking::start_listening(bool &)";
@@ -113,6 +115,7 @@ void Networking::start_listening(bool &active) {
 		// Increment successful packet count
 		this->packet_count++;
 	}
+	return;
 }
 
 int Networking::get_next_packet(unsigned char **packet, struct pcap_pkthdr *header) {

@@ -5,8 +5,8 @@ Table::Table(QWidget *parent,
 		unsigned row_height) : QTableWidget(parent) {
 	this->labels << "Frame"
 		<< "Time"
-		<< "Destination" 
 		<< "Source" 
+		<< "Destination" 
 		<< "Protocol"
 		<< "Information";
 
@@ -17,8 +17,8 @@ Table::Table(QWidget *parent,
 	// Set labels 
 	this->setHorizontalHeaderLabels(this->labels);
 
-	// Set sorting enabled
-	this->setSortingEnabled(true);
+	// Set sorting disabled - this messes up some features
+	this->setSortingEnabled(false);
 
 	// Set dividers to invisible
 	this->setShowGrid(false);
@@ -46,6 +46,16 @@ Table::~Table() {
 
 }
 
+void Table::keyPressEvent(QKeyEvent *event) {
+	// Super class implementation
+	QTableWidget::keyPressEvent(event);
+
+	if (event->key() == Qt::Key_Up || event->key() == Qt::Key_Down) {
+		emit this->cellClicked(this->currentRow(),
+				this->currentColumn());
+	}
+}
+
 void Table::append(QStringList items) {
 	if (items.count() != this->labels.count())
 		return;
@@ -55,7 +65,7 @@ void Table::append(QStringList items) {
 	for (int i = 0; i < items.count(); ++i) {
 		// Set each respective item
 		this->setItem(this->rowCount() - 1, i,
-				new QTableWidgetItem(items.at(i)));
+			new QTableWidgetItem(items.at(i)));
 		
 		// Set Cell as Read-Only
 		this->item(this->rowCount() - 1, i)->setFlags(this->item(this->rowCount() - 1, i)->flags() ^ Qt::ItemIsEditable);
@@ -65,3 +75,17 @@ void Table::append(QStringList items) {
 			this->item(this->rowCount() - 1, i)->setBackground(this->packet_colors["random"]);
 	}
 }
+
+void Table::append_packet(Packet *packet) {
+	// Frame, time, src_ip, dst_ip, protocol, general info
+	QStringList items;
+	items.append(QString::number(packet->get_frame())); 
+	items.append(QString::fromUtf8(Utils::convert_time(packet->get_header_timestamp())));
+	items.append(QString::fromStdString(Utils::convert_ip(packet->get_ip_header()->source)));
+	items.append(QString::fromStdString(Utils::convert_ip(packet->get_ip_header()->dest)));
+	items.append(QString::fromStdString(packet->get_protocol()));
+	items.append(QString::fromStdString(packet->get_info()));
+
+	this->append(items);
+}
+

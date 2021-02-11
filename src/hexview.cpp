@@ -49,16 +49,20 @@ void HexView::load_bytes(char *bytes, int len) {
 		this->setItem(i, 8,
 				new QTableWidgetItem(QString(ascii)));
 	}
-	memset(ascii, 0, 17);
-	for (int i = 0; i < 8 - (len % 8); ++i) {
-		ascii[i*2] = ' ';
-		if (bytes[8*(int)(len / 8) + i] >= 0x20 && bytes[8*(int)(len / 8) + i] <= 0x7e)
-			ascii[i*2 + 1] = bytes[8*(int)(len / 8) + i];
-		else
-			ascii[i*2 + 1] = '.';
+	
+	// Fill last line if there is excess 
+	if (len%8) {
+		memset(ascii, 0, 17);
+		for (int i = 0; i < 8 - (len % 8); ++i) {
+			ascii[i*2] = ' ';
+			if (bytes[8*(int)(len / 8) + i] >= 0x20 && bytes[8*(int)(len / 8) + i] <= 0x7e)
+				ascii[i*2 + 1] = bytes[8*(int)(len / 8) + i];
+			else
+				ascii[i*2 + 1] = '.';
+		}
+		this->setItem(this->rowCount() - 1, 8,
+				new QTableWidgetItem(QString(ascii)));
 	}
-	this->setItem(this->rowCount() - 1, 8,
-			new QTableWidgetItem(QString(ascii)));
 
 	// Color grey alternative lines
 	QColor col(0xd3, 0xd3, 0xd3);
@@ -67,4 +71,3 @@ void HexView::load_bytes(char *bytes, int len) {
 			this->item((int)(i/8), i%8)->setBackground(col);
 	}
 }
-
