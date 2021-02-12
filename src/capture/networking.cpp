@@ -100,25 +100,22 @@ void Networking::start_listening(bool *active) {
 	unsigned char *packet;
 	struct pcap_pkthdr header;
 
-	while (true) {
-		// Loop for every packet captured until conditions met
-		do {
-			if (this->get_next_packet(&packet, &header) != 0) {
-				Error::handle_error((char *)"Unable to capture packet.", 
-					this->error_type), "Networking::start_listening(bool &)";
-				continue;
-			}
+	// Loop for every packet captured until conditions met
+	do {
+		if (this->get_next_packet(&packet, &header) != 0) {
+			Error::handle_error((char *)"Unable to capture packet.", 
+				this->error_type), "Networking::start_listening(bool &)";
+			continue;
+		}
 
-			// Add packet to packet stream
-			this->packet_stream->push_back(this->packet_count, header, packet);
-			emit this->packet_recv((*this->packet_stream)[this->packet_count]); // Emit SIGNAL to say I've received new packet
+		// Add packet to packet stream
+		this->packet_stream->push_back(this->packet_count, header, packet);
+		emit this->packet_recv((*this->packet_stream)[this->packet_count]); // Emit SIGNAL to say I've received new packet
 
-			printf("Packet captured [%d]\n", this->packet_count);
-			// Increment successful packet count
-			this->packet_count++;
-		} while (*active);
-		emit this->stopped_recv();
-	}
+		// Increment successful packet count
+		this->packet_count++;
+	} while (*active);
+	emit this->stopped_recv();
 }
 
 int Networking::get_next_packet(unsigned char **packet, struct pcap_pkthdr *header) {

@@ -23,7 +23,8 @@
 #include <QSignalMapper>
 
 #include <QThread>
-#include <QThreadPool>
+#include <QMutex>
+#include <QWaitCondition>
 #include <QRunnable>
 
 #include <QDebug>
@@ -46,25 +47,60 @@ class CaptureThread : public QThread {
 			: capture(capture), active(active) {
 			
 			// Setting internal variables to indicate whether packets are being captured
-			this->connect(this->capture, &Networking::packet_recv,
-					[this](Packet *unused) {if (!this->running) this->running = true;} );
-			this->connect(this->capture, &Networking::stopped_recv,
-					[this]() {if (this->running) this->running = false;} );
+			//this->connect(this->capture, &Networking::packet_recv,
+			//        [this](Packet *unused) {if (!this->running) this->running = true;} );
+			//this->connect(this->capture, &Networking::stopped_recv,
+			//        [this]() {if (this->running) this->running = false;} );
 		}
 
-		bool get_running() { return this->running; }
-		bool get_run_once() { return this->run_once; }
+		bool get_pause() { return this->b_pause; }
+
+		void resume() {
+			if (!this->b_pause)
+				return;
+			this->mutex.lock();
+			this->b_pause = false;
+			//*this->active = true;
+			this->mutex.unlock();
+			this->pause_condition.wakeAll();
+		}
+
+		void pause() {
+			if (this->b_pause)
+				return;
+			this->mutex.lock();
+			this->b_pause = true;
+			//*this->active = false;
+			this->mutex.unlock();
+		}
+
+		void kill() {
+			if (!this->b_pause)
+				this->resume();
+			this->mutex.lock();
+			*this->active = false;
+			this->dead = true;
+			this->mutex.unlock();
+		}	
 
 		void run() override {
-			this->run_once = true;
-			capture->start_listening(this->active);
+			while(!dead) {
+				this->mutex.lock();
+				if (this->b_pause) 
+					this->pause_condition.wait(&this->mutex);
+				this->mutex.unlock();
+				capture->start_listening(this->active);
+			}
 		}
 
 	private:
 		Networking *capture;
 		bool *active;
-		bool running = false;
-		bool run_once = false;
+		bool b_pause = false;
+		bool dead = false;
+
+		QMutex mutex;
+		QWaitCondition pause_condition;
 };
 
 class Window : public QMainWindow {

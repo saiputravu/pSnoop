@@ -203,7 +203,7 @@ void Window::init_layout() {
 	// FIX THIS ISSUE
 	this->connect(this->packet_table, &Table::cellClicked,
 			this, &Window::load_packet_bytes,
-			Qt::QueuedConnection);
+			Qt::DirectConnection);
 
 	// Place holder, e_header, i_headers 
 	SearchBox *button = new SearchBox(this);
@@ -232,7 +232,6 @@ void Window::resizeEvent(QResizeEvent *event) {
 	// Call normal procedure
 	QWidget::resizeEvent(event);
 }
-
 
 void Window::select_interface() {
 	// Window setup
@@ -285,41 +284,33 @@ void Window::begin_capture() {
 	} else if (strncmp("\0", this->capture.get_cur_device(), 1)) { // Check if interface selected
 
 		// Run the thread if never run before
-		// Else wait until the packets are being recv'd
-		this->capture_active = true;
-		printf("Starting Capture\n");
-
-		if (!this->capture_thread->get_run_once()) {
+		// Else resume thread
+		if (!this->capture_thread->isRunning()) {
 			this->capture_thread->start();
+		} else if (!this->capture_thread->get_pause()) {
+			this->capture_thread->resume();
 		}
-		else {
-			while (!this->capture_thread->get_running())
-				usleep(1 * 10000);
 
 		this->setWindowTitle(QString("Live Capturing: ") + QString(this->capture.get_cur_device()));
-		}
-	} else {
+	}
+	 else {
 		this->error_pop_up ("Please select an interface first!");
 	}
 }
 
 void Window::end_capture () {
-	printf("Ending Capture\n");
 	this->setWindowTitle("Ending live capture ... ");
-	this->capture_active = false;
 
-	// Wait until it actually stops
-	while (this->capture_thread->get_running()) 
-		usleep(1 * 10000);
+	// Pause thread 
+	this->capture_thread->get_pause();
 }
 
 void Window::restart_capture () {
 	this->end_capture();
 
 	// Reset everything 
-	this->capture.get_packet_stream()->clear_packets();
-	this->packet_table->clear();
-	this->capture.reset_packet_count();
+	this->packet_table->setRowCount(0);
+	this->capture.clear_packets();
 	this->setWindowTitle("Reseting packet table ... ");
 
 	this->begin_capture();

@@ -38,7 +38,10 @@ class Networking : public QObject {
 		// Setters
 		bool set_subnet_netmask();
 		void setup_device(int index, int timeout=1000, bool promiscuous=false); 
-		void reset_packet_count() { this->packet_count = 0; }
+		void clear_packets() { 
+			this->packet_count = 0;
+			this->get_packet_stream()->clear_packets();
+		}
 
 		// Methods
 		void start_listening(int max_count=0);
