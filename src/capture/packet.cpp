@@ -86,7 +86,6 @@ void PacketStream::push_back(int frame,
 		pkt = new Packet(frame, header, data, e_header, i_header);	// Create new unknown packet object
 
 	this->packet_stream.push_back(pkt);	// Add pointer to the end of stream
-	emit this->packet_recv(pkt); 		// Emit SIGNAL to show new packet has been recv'd
 
 	//printf("Type: %d\n", (i_header->type_helen & 0xf0)>>4);
 	//printf("HeLen: %d\n", i_header->type_helen & 0x0f);

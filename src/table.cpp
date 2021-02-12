@@ -1,8 +1,7 @@
 #include "table.hpp"
 
 Table::Table(QWidget *parent, 
-		unsigned int x, unsigned int y,
-		unsigned row_height) : QTableWidget(parent) {
+		unsigned int row_height) : QTableWidget(parent), row_height(row_height) {
 	this->labels << "Frame"
 		<< "Time"
 		<< "Source" 
@@ -54,6 +53,48 @@ void Table::keyPressEvent(QKeyEvent *event) {
 		emit this->cellClicked(this->currentRow(),
 				this->currentColumn());
 	}
+}
+
+void Table::clear() {
+	// Super class implementation 
+	QTableWidget::clear();
+
+		this->labels << "Frame"
+		<< "Time"
+		<< "Source" 
+		<< "Destination" 
+		<< "Protocol"
+		<< "Information";
+
+	// this->table = new QTableWidget(parent);
+	this->setRowCount(0);
+	this->setColumnCount(this->labels.count());
+
+	// Set labels 
+	this->setHorizontalHeaderLabels(this->labels);
+
+	// Set sorting disabled - this messes up some features
+	this->setSortingEnabled(false);
+
+	// Set dividers to invisible
+	this->setShowGrid(false);
+
+	// Resize table and set resizeable
+	// this->resize();
+	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+	// Set row height
+	this->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+	this->verticalHeader()->setDefaultSectionSize(this->row_height);
+
+	// Resizing column widths
+	this->horizontalHeader()->setStretchLastSection(true);
+
+	// Hide left column
+	this->verticalHeader()->setVisible(false);
+
+	// Set selection behaviour to rows
+	this->setSelectionBehavior(QAbstractItemView::SelectRows);
 }
 
 void Table::append(QStringList items) {

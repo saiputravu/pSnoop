@@ -9,11 +9,15 @@
 
 #include <pcap.h>
 
+#include <QObject>
+
 #include "packet.hpp"
 #include "Utils/utils.hpp"
 #include "Utils/error.hpp"
 
-class Networking {
+class Networking : public QObject {
+	Q_OBJECT; 
+
 	public:
 		Networking(unsigned char error_type = Error::CLI);
 		~Networking();
@@ -34,6 +38,7 @@ class Networking {
 		// Setters
 		bool set_subnet_netmask();
 		void setup_device(int index, int timeout=1000, bool promiscuous=false); 
+		void reset_packet_count() { this->packet_count = 0; }
 
 		// Methods
 		void start_listening(int max_count=0);
@@ -63,6 +68,13 @@ class Networking {
 
 		unsigned int packet_count = 0;	// Count of packets captured so far
 		PacketStream *packet_stream;	// Stream / List of all captured packet objects
+
+	signals:
+		void packet_recv(Packet *packet); 
+		void stopped_recv();
+
+	public slots:
+
 };
 
 #endif // NETWORKING_H

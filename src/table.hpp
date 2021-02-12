@@ -25,14 +25,15 @@ class Table : public QTableWidget {
 
 	public:
 		Table(QWidget *parent = nullptr, 
-				unsigned int x = 0, unsigned int y = 0, 
-				unsigned row_height = 10);
+				unsigned int row_height = 10);
 		~Table();
 
 		// Getters 
 		QStringList get_labels() { return this->labels; }
 
+		// Methods
 		void append(QStringList items);
+		virtual void clear();
 
 	private:
 		// Methods
@@ -40,6 +41,7 @@ class Table : public QTableWidget {
 
 		// Properties
 		QStringList labels;
+		unsigned int row_height;
 
 		// Colours for packets
 		std::map<std::string, QColor> packet_colors =

@@ -4,13 +4,15 @@ Window::Window(QWidget *parent) : QMainWindow(parent) {
 	this->init_general();
 	this->init_menu();
 	this->init_layout();
+
+	// Tasks
+	capture_thread = new CaptureThread(&this->capture, &this->capture_active);
 }
 
 Window::~Window() {
-	if (this->capture_thread != nullptr) {
-		// Stop capture if it's active and join thread
-		this->capture_active = false;
-	}
+	// Stop capture if it's active and join thread
+	
+	this->capture_active = false;
 
 	// Kill application as you don't need it without main window open
 	QApplication::quit();
@@ -37,8 +39,6 @@ void Window::init_general() {
 	}
 
 	QApplication::setFont(font);
-
-
 }
 
 void Window::init_menu() {
@@ -140,7 +140,7 @@ void Window::init_menu() {
 	this->connect(this->restart_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::restart_capture);
 
 	this->capture_filter_action = new QAction("&Capture filter options", this);
 	this->capture_filter_action->setStatusTip("Raw libpcap filter - filter before beginning capturing");
@@ -192,7 +192,7 @@ void Window::init_layout() {
 
 	// Packet table object & setup add new packet on receiving new packet
 	this->packet_table = new Table(this);
-	this->connect(this->capture.get_packet_stream(), &PacketStream::packet_recv,
+	this->connect(&this->capture, &Networking::packet_recv,
 			this->packet_table, &Table::append_packet);
 
 	// HexView object
@@ -202,7 +202,8 @@ void Window::init_layout() {
 
 	// FIX THIS ISSUE
 	this->connect(this->packet_table, &Table::cellClicked,
-			this, &Window::load_packet_bytes);
+			this, &Window::load_packet_bytes,
+			Qt::QueuedConnection);
 
 	// Place holder, e_header, i_headers 
 	SearchBox *button = new SearchBox(this);
@@ -221,7 +222,6 @@ void Window::init_layout() {
 	// Putting them together 
 	this->container->addWidget(v_splitter);
 	this->main_widget->setLayout(container);
-
 }
 
 void Window::resizeEvent(QResizeEvent *event) {
@@ -283,17 +283,21 @@ void Window::begin_capture() {
 	if (this->capture_active) {
 		this->error_pop_up("Capture already active!");
 	} else if (strncmp("\0", this->capture.get_cur_device(), 1)) { // Check if interface selected
-		this->setWindowTitle(QString("Live Capturing: ") + QString(this->capture.get_cur_device()));
+
+		// Run the thread if never run before
+		// Else wait until the packets are being recv'd
 		this->capture_active = true;
-		
-		// this->capture.get_packet_stream()->clear_packets();
-		// Create new thread in background in order to allow independant packet capture
-		capture_thread = new std::thread([this](auto a) { this->capture.start_listening(a); },
-			&this->capture_active);
+		printf("Starting Capture\n");
 
-		// Continue thread execution independantly
-		this->capture_thread->detach();
+		if (!this->capture_thread->get_run_once()) {
+			this->capture_thread->start();
+		}
+		else {
+			while (!this->capture_thread->get_running())
+				usleep(1 * 10000);
 
+		this->setWindowTitle(QString("Live Capturing: ") + QString(this->capture.get_cur_device()));
+		}
 	} else {
 		this->error_pop_up ("Please select an interface first!");
 	}
@@ -301,7 +305,24 @@ void Window::begin_capture() {
 
 void Window::end_capture () {
 	printf("Ending Capture\n");
+	this->setWindowTitle("Ending live capture ... ");
 	this->capture_active = false;
+
+	// Wait until it actually stops
+	while (this->capture_thread->get_running()) 
+		usleep(1 * 10000);
+}
+
+void Window::restart_capture () {
+	this->end_capture();
+
+	// Reset everything 
+	this->capture.get_packet_stream()->clear_packets();
+	this->packet_table->clear();
+	this->capture.reset_packet_count();
+	this->setWindowTitle("Reseting packet table ... ");
+
+	this->begin_capture();
 }
 
 void Window::load_packet_bytes(int row, int col) {	

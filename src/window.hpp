@@ -22,10 +22,15 @@
 #include <QListWidget>
 #include <QSignalMapper>
 
+#include <QThread>
+#include <QThreadPool>
+#include <QRunnable>
+
 #include <QDebug>
 
 #include <iostream>
 #include <stdio.h>
+#include <unistd.h>
 #include <thread>
 
 #include "table.hpp"
@@ -33,6 +38,34 @@
 #include "hexview.hpp"
 #include "searchbox.hpp"
 #include "capture/networking.hpp"
+
+class CaptureThread : public QThread {
+	Q_OBJECT;
+	public:
+		CaptureThread(Networking *capture, bool *active) 
+			: capture(capture), active(active) {
+			
+			// Setting internal variables to indicate whether packets are being captured
+			this->connect(this->capture, &Networking::packet_recv,
+					[this](Packet *unused) {if (!this->running) this->running = true;} );
+			this->connect(this->capture, &Networking::stopped_recv,
+					[this]() {if (this->running) this->running = false;} );
+		}
+
+		bool get_running() { return this->running; }
+		bool get_run_once() { return this->run_once; }
+
+		void run() override {
+			this->run_once = true;
+			capture->start_listening(this->active);
+		}
+
+	private:
+		Networking *capture;
+		bool *active;
+		bool running = false;
+		bool run_once = false;
+};
 
 class Window : public QMainWindow {
 	Q_OBJECT;
@@ -58,7 +91,7 @@ class Window : public QMainWindow {
 		
 		Networking capture;	// Object for networking side of application
 		bool capture_active = false;
-		std::thread *capture_thread = nullptr;
+		CaptureThread *capture_thread = nullptr;
 
 		// General Methods
 		void init_general();
@@ -97,6 +130,7 @@ class Window : public QMainWindow {
 		QAction *about_action;
 		
 	signals:
+		void begin_capture_signal(bool *active);
 
 	private slots:
 		// Menu Slots
@@ -109,6 +143,7 @@ class Window : public QMainWindow {
 		void select_interface_button(QWidget *list);
 		void begin_capture();
 		void end_capture();
+		void restart_capture();
 		void capture_filter();
 
 		// Pane related slots
