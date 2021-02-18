@@ -56,6 +56,8 @@ class Packet {
 
 		std::string protocol = "";				// Protocol Type
 		std::string info = "";					// Extra information filled at instantiation
+		bool filtered = false;					// Filter flag
+
 		unsigned char error_type;
 
 };

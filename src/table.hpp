@@ -16,6 +16,7 @@
 
 #include <map>
 #include <string>
+#include <arpa/inet.h>
 
 #include "settings.hpp"
 #include "capture/packet.hpp"
@@ -25,7 +26,8 @@ class Table : public QTableWidget {
 
 	public:
 		Table(QWidget *parent = nullptr, 
-				unsigned int row_height = 10);
+				unsigned int row_height = 10,
+				int endian = 0);
 		~Table();
 
 		// Getters 
@@ -42,6 +44,7 @@ class Table : public QTableWidget {
 		// Properties
 		QStringList labels;
 		unsigned int row_height;
+		int endian;
 
 		// Colours for packets
 		std::map<std::string, QColor> packet_colors =

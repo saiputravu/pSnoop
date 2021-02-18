@@ -1,7 +1,8 @@
 #include "table.hpp"
 
 Table::Table(QWidget *parent, 
-		unsigned int row_height) : QTableWidget(parent), row_height(row_height) {
+		unsigned int row_height,
+		int endian) : QTableWidget(parent), row_height(row_height), endian(endian){
 	this->labels << "Frame"
 		<< "Time"
 		<< "Source" 
@@ -122,8 +123,17 @@ void Table::append_packet(Packet *packet) {
 	QStringList items;
 	items.append(QString::number(packet->get_frame())); 
 	items.append(QString::fromUtf8(Utils::convert_time(packet->get_header_timestamp())));
-	items.append(QString::fromStdString(Utils::convert_ip(packet->get_ip_header()->source)));
-	items.append(QString::fromStdString(Utils::convert_ip(packet->get_ip_header()->dest)));
+	unsigned int src, dest;
+	src  = packet->get_ip_header()->source;
+	dest = packet->get_ip_header()->dest;
+	if (!endian) {
+	// swap endianness (wifi)
+		src = ntohl(src);
+		dest = ntohl(dest);
+	}
+
+	items.append(QString::fromStdString(Utils::convert_ip(src)));
+	items.append(QString::fromStdString(Utils::convert_ip(dest)));
 	items.append(QString::fromStdString(packet->get_protocol()));
 	items.append(QString::fromStdString(packet->get_info()));
 
