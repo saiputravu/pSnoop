@@ -46,6 +46,7 @@ class Networking : public QObject {
 		// Methods
 		void start_listening(int max_count=0);
 		void start_listening(bool *active);
+		void listen_next_packet();
 		
 		int get_next_packet(unsigned char **packet, struct pcap_pkthdr *header);
 		int set_filter(const char *expression, int optimize=0);

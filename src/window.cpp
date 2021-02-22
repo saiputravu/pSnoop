@@ -299,10 +299,10 @@ void Window::begin_capture() {
 }
 
 void Window::end_capture () {
-	this->setWindowTitle("Ending live capture ... ");
+	this->setWindowTitle("Ended live capture ... ");
 
 	// Pause thread 
-	this->capture_thread->get_pause();
+	this->capture_thread->pause();
 }
 
 void Window::restart_capture () {

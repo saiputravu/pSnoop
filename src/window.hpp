@@ -78,19 +78,22 @@ class CaptureThread : public QThread {
 			if (!this->b_pause)
 				this->resume();
 			this->mutex.lock();
-			*this->active = false;
 			this->dead = true;
 			this->mutex.unlock();
 		}	
 
 		void run() override {
+			capture->start_listening(this->active);
 			while(!dead) {
 				this->mutex.lock();
-				if (this->b_pause) 
-					this->pause_condition.wait(&this->mutex);
+				if (this->b_pause)  {
+					qDebug("Paused");
+					this->pause_condition.wait(&this->mutex); 
+				}
+				this->capture->listen_next_packet();
 				this->mutex.unlock();
-				capture->start_listening(this->active);
 			}
+			qDebug("Killed listen");
 		}
 
 	private:
@@ -98,6 +101,7 @@ class CaptureThread : public QThread {
 		bool *active;
 		bool b_pause = false;
 		bool dead = false;
+		bool run_once = false;
 
 		QMutex mutex;
 		QWaitCondition pause_condition;
