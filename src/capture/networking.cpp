@@ -114,7 +114,7 @@ void Networking::start_listening(bool *active) {
 
 		// Increment successful packet count
 		this->packet_count++;
-		printf("Packet: [%d]\n", this->packet_count);
+
 	} while (*active);
 	emit this->stopped_recv();
 }
@@ -125,11 +125,13 @@ void Networking::listen_next_packet() {
 	if (this->get_next_packet(&packet, &header) != 0) {
 		Error::handle_error((char *)"Unable to capture packet.",
 				this->error_type, "Networking::start_listening_to_loop()");
+		return;
 	}
 
 	// Add packet to packet stream
 	this->packet_stream->push_back(this->packet_count, header, packet);
 	emit this->packet_recv((*this->packet_stream)[this->packet_count]);
+	printf("Captured: [%d]\n", this->packet_count);
 
 	this->packet_count++;
 }

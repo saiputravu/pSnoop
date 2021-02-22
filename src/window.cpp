@@ -287,7 +287,7 @@ void Window::begin_capture() {
 		// Else resume thread
 		if (!this->capture_thread->isRunning()) {
 			this->capture_thread->start();
-		} else if (!this->capture_thread->get_pause()) {
+		} else {
 			this->capture_thread->resume();
 		}
 
@@ -299,10 +299,12 @@ void Window::begin_capture() {
 }
 
 void Window::end_capture () {
-	this->setWindowTitle("Ended live capture ... ");
+	this->setWindowTitle("Ending live capture ... ");
 
 	// Pause thread 
 	this->capture_thread->pause();
+
+	this->setWindowTitle("Ended live capture ... ");
 }
 
 void Window::restart_capture () {

@@ -83,15 +83,14 @@ class CaptureThread : public QThread {
 		}	
 
 		void run() override {
-			capture->start_listening(this->active);
 			while(!dead) {
 				this->mutex.lock();
 				if (this->b_pause)  {
-					qDebug("Paused");
 					this->pause_condition.wait(&this->mutex); 
+				} else {
 				}
-				this->capture->listen_next_packet();
 				this->mutex.unlock();
+				this->capture->listen_next_packet();
 			}
 			qDebug("Killed listen");
 		}
