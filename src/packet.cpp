@@ -85,7 +85,8 @@ void PacketStream::push_back(int frame,
 	} else
 		pkt = new Packet(frame, header, data, e_header, i_header);	// Create new unknown packet object
 
-	this->packet_stream.push_back(pkt);				// Add pointer to the end of stream
+	this->packet_stream.push_back(pkt);	// Add pointer to the end of stream
+
 	//printf("Type: %d\n", (i_header->type_helen & 0xf0)>>4);
 	//printf("HeLen: %d\n", i_header->type_helen & 0x0f);
 	//printf("Packet Length: %d or 0x%x\n",

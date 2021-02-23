@@ -56,6 +56,8 @@ class Packet {
 
 		std::string protocol = "";				// Protocol Type
 		std::string info = "";					// Extra information filled at instantiation
+		bool filtered = false;					// Filter flag
+
 		unsigned char error_type;
 
 };
@@ -151,6 +153,7 @@ class ARPPacket : public Packet {
 };
 
 class PacketStream {
+
 	public:
 		PacketStream(unsigned char error_type = Error::CLI);
 		~PacketStream();
@@ -166,6 +169,10 @@ class PacketStream {
 		void push_back(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data);
+
+		void clear_packets() {
+			this->packet_stream.clear();
+		}
 
 	private:
 		// Properties 
