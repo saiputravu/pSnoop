@@ -43,14 +43,9 @@
 class CaptureThread : public QThread {
 	Q_OBJECT;
 	public:
-		CaptureThread(Networking *capture, bool *active) 
-			: capture(capture), active(active) {
+		CaptureThread(Networking *capture) 
+			: capture(capture) {
 			
-			// Setting internal variables to indicate whether packets are being captured
-			//this->connect(this->capture, &Networking::packet_recv,
-			//        [this](Packet *unused) {if (!this->running) this->running = true;} );
-			//this->connect(this->capture, &Networking::stopped_recv,
-			//        [this]() {if (this->running) this->running = false;} );
 		}
 
 		bool get_pause() { return this->b_pause; }
@@ -60,7 +55,6 @@ class CaptureThread : public QThread {
 				return;
 			this->mutex.lock();
 			this->b_pause = false;
-			//*this->active = true;
 			this->mutex.unlock();
 			this->pause_condition.wakeAll();
 		}
@@ -70,7 +64,6 @@ class CaptureThread : public QThread {
 				return;
 			this->mutex.lock();
 			this->b_pause = true;
-			//*this->active = false;
 			this->mutex.unlock();
 		}
 
@@ -83,24 +76,21 @@ class CaptureThread : public QThread {
 		}	
 
 		void run() override {
+			this->resume(); // as it starts off as in pause
 			while(!dead) {
 				this->mutex.lock();
 				if (this->b_pause)  {
 					this->pause_condition.wait(&this->mutex); 
-				} else {
 				}
 				this->mutex.unlock();
 				this->capture->listen_next_packet();
 			}
-			qDebug("Killed listen");
 		}
 
 	private:
 		Networking *capture;
-		bool *active;
-		bool b_pause = false;
+		bool b_pause = true;
 		bool dead = false;
-		bool run_once = false;
 
 		QMutex mutex;
 		QWaitCondition pause_condition;
@@ -184,6 +174,7 @@ class Window : public QMainWindow {
 		void end_capture();
 		void restart_capture();
 		void capture_filter();
+		void capture_filter_button(QWidget *textbox);
 
 		// Pane related slots
 		void load_packet_bytes(int row, int col);

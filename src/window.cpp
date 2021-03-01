@@ -6,14 +6,13 @@ Window::Window(QWidget *parent) : QMainWindow(parent) {
 	this->init_layout();
 
 	// Tasks
-	capture_thread = new CaptureThread(&this->capture, &this->capture_active);
+	this->capture_thread = new CaptureThread(&this->capture);
 }
 
 Window::~Window() {
 	// Stop capture if it's active and join thread
+	this->capture_thread->kill();
 	
-	this->capture_active = false;
-
 	// Kill application as you don't need it without main window open
 	QApplication::quit();
 }
@@ -274,8 +273,40 @@ void Window::select_interface_button(QWidget *list) {
 }
 
 void Window::capture_filter() {	
+	if (!this->capture_thread->get_pause()) {
+		error_pop_up("You can only set a capture filter when not listening!");
+		return;
+	} else if (!strncmp("\0", this->capture.get_cur_device(), 1)) { // Check if interface selected
+		error_pop_up("You must select an interface first!");
+		return;
+	}
+
 	QWidget *pop_up = new QWidget();
+	QHBoxLayout *layout = new QHBoxLayout();
+	QLineEdit *textbox = new QLineEdit();
+	QPushButton *submit = new QPushButton();
+	
+	submit->setText("Set filter");
+	QSignalMapper *sig_mapper = new QSignalMapper(pop_up);
+	this->connect(submit, SIGNAL(clicked()), sig_mapper, SLOT(map()));
+	sig_mapper->setMapping(submit, textbox);
+	this->connect(sig_mapper, SIGNAL(mapped(QWidget *)), this, SLOT(capture_filter_button(QWidget *)));
+
+	layout->addWidget(textbox);
+	layout->addWidget(submit);
+	pop_up->setLayout(layout);
 	pop_up->show();
+}
+
+void Window::capture_filter_button(QWidget *textbox) {
+	QLineEdit *query_box = (QLineEdit *)textbox;
+	std::string query = query_box->text().toUtf8().constData();
+	int ret = this->capture.set_filter(query.c_str());
+	if (ret != 0) {
+		error_pop_up("Invalid capture filter");
+		return;
+	}
+	query_box->parentWidget()->close();
 }
 
 void Window::begin_capture() {
