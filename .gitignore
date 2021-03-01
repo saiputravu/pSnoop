@@ -1,0 +1,12 @@
+
+# VIM temp files
+*.swp
+*.swo
+
+# Qt compiler temp files
+*.stash 
+*.o
+build/*
+build
+moc_*
+Makefile

@@ -131,7 +131,6 @@ void Networking::listen_next_packet() {
 	// Add packet to packet stream
 	this->packet_stream->push_back(this->packet_count, header, packet);
 	emit this->packet_recv((*this->packet_stream)[this->packet_count]);
-	printf("Captured: [%d]\n", this->packet_count);
 
 	this->packet_count++;
 }
