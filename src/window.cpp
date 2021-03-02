@@ -63,8 +63,8 @@ void Window::init_menu() {
 	this->settings_action->setStatusTip("Open preferences ...");
 	this->connect(this->settings_action, 
 			&QAction::triggered, 
-			this, 
-			&Window::not_implemented);
+			this->settings, 
+			&Settings::open_window);
 	
 	this->quit_action = new QAction("Quit", this);
 	this->quit_action->setShortcut(QKeySequence("Ctrl+w"));

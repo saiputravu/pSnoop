@@ -13,6 +13,9 @@
 #include <QString>
 #include <QColor>
 #include <QKeyEvent>
+#include <QRect>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #include <map>
 #include <string>
@@ -26,7 +29,7 @@ class Table : public QTableWidget {
 
 	public:
 		Table(QWidget *parent = nullptr, 
-				unsigned int row_height = 10,
+				unsigned int row_height = 0,
 				int endian = 0);
 		~Table();
 
@@ -57,7 +60,7 @@ class Table : public QTableWidget {
 
 	public slots:
 		void append_packet(Packet *packet);	// Connect this to a PacketStream signal
-												// Re-cast to Packet *, QSignalMapper only accepts QObject objects
+											// Re-cast to Packet *, QSignalMapper only accepts QObject objects
 		
 
 };

@@ -28,8 +28,13 @@ Table::Table(QWidget *parent,
 	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 	// Set row height
+	// Set it as 2% of screen height
+	if (this->row_height == 0) {
+		QRect screen = QApplication::desktop()->screenGeometry();
+		this->row_height = (int)(screen.height() * 0.02);
+	}
 	this->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-	this->verticalHeader()->setDefaultSectionSize(row_height);
+	this->verticalHeader()->setDefaultSectionSize(this->row_height);
 
 	// Resizing column widths
 	this->horizontalHeader()->setStretchLastSection(true);

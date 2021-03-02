@@ -1,7 +1,25 @@
 #include "settings.hpp"
 
-Settings::Settings(std::string config_file) : config_file(config_file) {
-	this->parse_file();
+Settings::Settings(std::string config_file, QWidget *parent) : config_file(config_file), QWidget(parent){
+	// this->parse_file();
+	
+	this->setWindowTitle("Settings");
+
+	container = new QHBoxLayout();
+
+	settings_layout = new QVBoxLayout();
+	categories = new QListWidget();
+	this->categories->setMaximumWidth((int)(this->width() * 0.25));
+
+	test = new QPushButton();
+	test->setText("Submit");
+
+	this->settings_layout->addWidget(test);
+
+	this->container->addWidget(categories);
+	this->container->addLayout(settings_layout);
+	
+	this->setLayout(container);
 }
 
 Settings::~Settings() {
@@ -34,4 +52,14 @@ QString Settings::get(std::string key) {
 	if (this->config.find(key) == this->config.end()) 
 		return QString("Bad");
 	return this->config[key];
+}
+
+void Settings::resizeEvent(QResizeEvent *event) {
+	QWidget::resizeEvent(event);
+
+	this->categories->setMaximumWidth((int)(this->width()*0.25));
+}
+
+void Settings::open_window() {
+	this->show();
 }
