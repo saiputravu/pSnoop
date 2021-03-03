@@ -10,9 +10,11 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QResizeEvent>
+#include <QComboBox>
+#include <QButtonGroup>
 #include <QFont>
 #include <QString>
-#include <QtAlgorithms>
+#include <QStyleFactory>
 
 #include <string>
 #include <sstream>
@@ -33,7 +35,7 @@ class Settings : public QWidget {
 		// Methods
 		void generate_default_config();
 
-		void clear_layout(QLayout *layout);
+		static void clear_layout(QLayout *layout);
 
 	private:
 		// Properties

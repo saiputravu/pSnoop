@@ -26,6 +26,8 @@
 #include <QMutex>
 #include <QWaitCondition>
 #include <QRunnable>
+#include <QFile>
+#include <QTextStream>
 
 #include <QDebug>
 

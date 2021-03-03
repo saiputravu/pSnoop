@@ -154,9 +154,28 @@ void Settings::general_tab() {
 void Settings::appearance_tab() {
 	clear_layout(this->settings_layout);
 	
-	QPushButton *test = new QPushButton();
-	test->setText("Test");
-	this->settings_layout->addWidget(test);
+	QHBoxLayout *style_layout = new QHBoxLayout();
+	QComboBox *style_selection = new QComboBox();
+	QLabel *style_label = new QLabel();
+
+
+	// Options 
+	style_selection->addItems(QStyleFactory::keys());
+
+	style_label->setText("GUI Style");
+
+	// Layouts 
+	style_layout->addWidget(style_label);
+	style_layout->addWidget(style_selection);	
+
+	// Main layout
+	this->settings_layout->addLayout(style_layout);
+
+	QWidget *padding = new QWidget();
+	padding->setSizePolicy(
+			QSizePolicy::Expanding,
+			QSizePolicy::Preferred);
+	this->settings_layout->addWidget(padding);
 }
 
 void Settings::clear_layout(QLayout *layout) {

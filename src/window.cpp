@@ -40,7 +40,8 @@ void Window::init_general() {
 	QApplication::setFont(font);
 
 	// Setting theme
-	QApplication::setStyle("macintosh");
+	QApplication::setStyle("fusion");
+
 }
 
 void Window::init_menu() {
