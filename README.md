@@ -17,16 +17,16 @@ qmake && make
 
 # Filter syntax and usage
 
-##Compatible commands right now:
+## Compatible commands right now:
 	* length | ==, >(=), <(=), != | Filters: packet length 
 	* protocol | ==, != | Filters: packet protocol 
 	* contains | ==, != | Filters: strings contained in packet
 	* Wildcard: *
 	* Chaining commands: &&
 
-###Note: priority of chained commands are treated in chronological order
+### Note: priority of chained commands are treated in chronological order
 
-##Example Usage
+## Example Usage
 ```c
 length == 102 && protocol == UDP
 protocol == TCP
