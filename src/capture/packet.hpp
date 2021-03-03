@@ -26,10 +26,11 @@ class Packet {
 
 		// Getters
 		int get_frame() { return this->frame; }
-		unsigned int get_header_len() { return this->header->len; }
+		unsigned int get_header_len() { return this->header->len; } // Packet length
 		time_t get_header_timestamp() { return this->header->ts.tv_sec; }
 		unsigned char *get_data() { return this->data; }
 		unsigned char *get_packet() { return this->data; }
+		bool get_filtered() { return this->filtered; }
 		std::string get_protocol() { return this->protocol; }
 		std::string get_info() { return this->info; }
 		struct ether_header *get_ether_header() { return this->ether_header; }
@@ -40,6 +41,7 @@ class Packet {
 		}
 
 		// Setters
+		void set_filtered(bool flag) { this->filtered = flag; }
 
 	private:
 		// Methods
@@ -173,6 +175,8 @@ class PacketStream {
 		void clear_packets() {
 			this->packet_stream.clear();
 		}
+
+		unsigned int size() { return (unsigned int)this->packet_stream.size(); }
 
 	private:
 		// Properties 

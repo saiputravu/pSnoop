@@ -208,22 +208,25 @@ void Window::init_layout() {
 			Qt::DirectConnection);
 
 	// Place holder, e_header, i_headers 
-	SearchBox *button = new SearchBox(this);
+	this->search_box = new SearchBox(this->capture.get_packet_stream(), this);
+	this->connect(this->search_box, &SearchBox::reload_packets, 
+			this->packet_table, &Table::reload_packets);
+
 	QPushButton *button2 = new QPushButton(this);
 	button2->setText("HelloWorld2");
 	
 	// Right hand side
 	this->h_splitter->addWidget(this->packet_table);
-	this->h_splitter->addWidget(button);
+	this->h_splitter->addWidget(this->search_box);
 	this->h_splitter->addWidget(button2);
 
 	// Left hand side
-	this->v_splitter->addWidget(hex_view);
-	this->v_splitter->addWidget(h_splitter);
+	this->v_splitter->addWidget(this->hex_view);
+	this->v_splitter->addWidget(this->h_splitter);
 
 	// Putting them together 
-	this->container->addWidget(v_splitter);
-	this->main_widget->setLayout(container);
+	this->container->addWidget(this->v_splitter);
+	this->main_widget->setLayout(this->container);
 }
 
 void Window::resizeEvent(QResizeEvent *event) {

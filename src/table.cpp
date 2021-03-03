@@ -61,48 +61,6 @@ void Table::keyPressEvent(QKeyEvent *event) {
 	}
 }
 
-void Table::clear() {
-	// Super class implementation 
-	QTableWidget::clear();
-
-		this->labels << "Frame"
-		<< "Time"
-		<< "Source" 
-		<< "Destination" 
-		<< "Protocol"
-		<< "Information";
-
-	// this->table = new QTableWidget(parent);
-	this->setRowCount(0);
-	this->setColumnCount(this->labels.count());
-
-	// Set labels 
-	this->setHorizontalHeaderLabels(this->labels);
-
-	// Set sorting disabled - this messes up some features
-	this->setSortingEnabled(false);
-
-	// Set dividers to invisible
-	this->setShowGrid(false);
-
-	// Resize table and set resizeable
-	// this->resize();
-	this->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-	// Set row height
-	this->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-	this->verticalHeader()->setDefaultSectionSize(this->row_height);
-
-	// Resizing column widths
-	this->horizontalHeader()->setStretchLastSection(true);
-
-	// Hide left column
-	this->verticalHeader()->setVisible(false);
-
-	// Set selection behaviour to rows
-	this->setSelectionBehavior(QAbstractItemView::SelectRows);
-}
-
 void Table::append(QStringList items) {
 	if (items.count() != this->labels.count())
 		return;
@@ -123,7 +81,21 @@ void Table::append(QStringList items) {
 	}
 }
 
+void Table::reload_packets(PacketStream *stream) {
+	// Clear table
+	this->setRowCount(0);
+
+	// append all packets
+	for (unsigned int i = 0; i < stream->size(); ++i)
+		this->append_packet((*stream)[i]);
+
+}
+
 void Table::append_packet(Packet *packet) {
+	// Don't add packet if there is a filter applied
+	if (packet->get_filtered())
+		return;
+
 	// Frame, time, src_ip, dst_ip, protocol, general info
 	QStringList items;
 	items.append(QString::number(packet->get_frame())); 

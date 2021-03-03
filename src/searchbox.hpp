@@ -11,9 +11,13 @@
 #include <QAction>
 
 #include <iostream>
+#include <string>
 #include <vector>
 #include <boost/spirit/home/x3.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include "capture/packet.hpp"
 
 namespace x3 = boost::spirit::x3;
 
@@ -37,13 +41,13 @@ namespace Parser {
 	inline static const auto string_key = x3::string("protocol")
 		| x3::string("contains");
 	inline static const auto string_operator = x3::string("==") | x3::string("!=");
-	inline static const auto string_value = as<std::string>(+x3::char_("a-zA-Z0-9"));
+	inline static const auto string_value = as<std::string>(+x3::char_("a-zA-Z0-9\*"));
 
 	inline static const auto int_key = x3::string("length");
 	inline static const auto int_operator = x3::string(">=") | x3::string("<=") |
 		x3::string("<") | x3::string("==") | 
 		x3::string(">") | x3::string("!=");
-	inline static const auto int_value = as<std::string>(+x3::char_("0-9"));
+	inline static const auto int_value = as<std::string>(+x3::char_("0-9\*"));
 
 	inline x3::rule<class query, ast::query_struct> const query = "query";
 	inline static const auto query_def = 
@@ -63,11 +67,15 @@ class SearchBox : public QWidget {
 	Q_OBJECT;
 
 	public:
-		SearchBox(QWidget *parent = nullptr);
+		SearchBox(PacketStream *stream, QWidget *parent = nullptr);
 		~SearchBox();
 		
 		// Methods
 		bool check_syntax(QString query_qstring);
+		static void set_packet_filter(Packet *packet, Parser::ast::query_struct query, bool chain=false);
+
+		static bool filter_query(int field, Parser::ast::query_struct query);
+		static bool filter_query(std::string field, Parser::ast::query_struct query);
 
 	private:
 		// Attributes 
@@ -77,8 +85,12 @@ class SearchBox : public QWidget {
 		QHBoxLayout *container;
 
 		std::vector<Parser::ast::query_struct> queries;
+		PacketStream *stream;
+	
+	signals:
+		void reload_packets(PacketStream *stream);
 
-	private slots:
+	public slots:
 		void on_submit();
 		void query_highlighting();
 };

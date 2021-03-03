@@ -114,6 +114,7 @@ class Window : public QMainWindow {
 
 		Table *packet_table;
 		HexView *hex_view;
+		SearchBox *search_box;
 		QSplitter *h_splitter;
 		QSplitter *v_splitter;
 		QVBoxLayout *container;

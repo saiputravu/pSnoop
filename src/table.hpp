@@ -38,7 +38,6 @@ class Table : public QTableWidget {
 
 		// Methods
 		void append(QStringList items);
-		virtual void clear();
 
 	private:
 		// Methods
@@ -59,6 +58,7 @@ class Table : public QTableWidget {
 	signals:
 
 	public slots:
+		void reload_packets(PacketStream *stream);
 		void append_packet(Packet *packet);	// Connect this to a PacketStream signal
 											// Re-cast to Packet *, QSignalMapper only accepts QObject objects
 		
