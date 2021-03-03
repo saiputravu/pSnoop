@@ -38,6 +38,9 @@ void Window::init_general() {
 	}
 
 	QApplication::setFont(font);
+
+	// Setting theme
+	QApplication::setStyle("macintosh");
 }
 
 void Window::init_menu() {
@@ -199,7 +202,6 @@ void Window::init_layout() {
 	this->hex_view->setMaximumSize(hex_view->get_cell_width() * (8 + 7),
 			this->height()+4000);
 
-	// FIX THIS ISSUE
 	this->connect(this->packet_table, &Table::cellClicked,
 			this, &Window::load_packet_bytes,
 			Qt::DirectConnection);

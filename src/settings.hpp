@@ -6,10 +6,13 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QPushButton>
+#include <QLineEdit>
+#include <QLabel>
 #include <QListWidget>
 #include <QResizeEvent>
 #include <QFont>
 #include <QString>
+#include <QtAlgorithms>
 
 #include <string>
 #include <sstream>
@@ -28,11 +31,13 @@ class Settings : public QWidget {
 		QString get(std::string key);
 		
 		// Methods
-		void parse_file();
+		void generate_default_config();
+
+		void clear_layout(QLayout *layout);
 
 	private:
 		// Properties
-		std::string config_file;
+		std::string config_file = "\0";
 		std::map<std::string, QString> config;
 
 		void store_value(std::string key, std::string value);
@@ -40,14 +45,21 @@ class Settings : public QWidget {
 		// Qt Objects
 		QHBoxLayout *container;
 		QVBoxLayout *settings_layout;
-		QWidget *settings;
 		QListWidget *categories;
-		QPushButton *test;
 
 	signals:
 
 	public slots:
+		void set_config_file(const QString &text) { this->config_file = text.toUtf8().constData(); }
+		void parse_file();
 		void open_window();
+
+		// Tabs
+		void tab_manager(QListWidgetItem *item);
+		void general_tab();
+		void appearance_tab();
+
+		// Re-implemented
 		void resizeEvent(QResizeEvent *event);
 
 };
