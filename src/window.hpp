@@ -10,40 +10,45 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QPushButton>
-#include <QContextMenuEvent>
+#include <QListWidget>
+#include <QLabel>
+
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
 #include <QActionGroup>
-#include <QKeySequence>
-#include <QLabel>
 #include <QFont>
-#include <QScrollArea>
-#include <QListWidget>
-#include <QSignalMapper>
 
+#include <QPieSeries>
+#include <QChartView>
+#include <QChart>
+#include <QPainter>
+#include <QLegend>
+
+#include <QSignalMapper>
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
 #include <QRunnable>
 #include <QFile>
 #include <QTextStream>
-
 #include <QDebug>
 
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
-#include <thread>
+#include <map>
 
 #include "table.hpp"
 #include "settings.hpp"
 #include "hexview.hpp"
 #include "searchbox.hpp"
 #include "capture/networking.hpp"
+#include "capture/packet.hpp"
 
+QT_CHARTS_USE_NAMESPACE
 class CaptureThread : public QThread {
-	Q_OBJECT;
+	Q_OBJECT
 	public:
 		CaptureThread(Networking *capture) 
 			: capture(capture) {
@@ -178,6 +183,8 @@ class Window : public QMainWindow {
 		void restart_capture();
 		void capture_filter();
 		void capture_filter_button(QWidget *textbox);
+		void statistics();
+		void statistics_hover(QPieSlice *slice, bool state); // On hover, zoom pie slice
 
 		// Pane related slots
 		void load_packet_bytes(int row, int col);

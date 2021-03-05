@@ -157,7 +157,7 @@ void Window::init_menu() {
 	this->connect(this->statistics_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::statistics);
 	
 	// Capture Menu
 	this->capture_menu = this->menuBar()->addMenu(QString("&Capture"));
@@ -313,6 +313,69 @@ void Window::capture_filter_button(QWidget *textbox) {
 		return;
 	}
 	query_box->parentWidget()->close();
+}
+
+void Window::statistics() {
+	if (!this->capture_thread->get_pause()) {
+		this->error_pop_up("Please stop capturing first!");
+		return;
+	}
+
+	QWidget *pop_up = new QWidget();
+	QPieSeries *series = new QPieSeries();
+	QChart *chart = new QChart();
+	QChartView *chart_view = new QChartView(chart);
+	QVBoxLayout *layout = new QVBoxLayout();
+
+	// Calculations
+	std::map<std::string, unsigned int>protocol_count = {};
+	for (int i = 0; i < this->capture.get_packet_stream()->size(); ++i) {
+		Packet *pkt = (*this->capture.get_packet_stream())[i];
+		if (protocol_count.find(pkt->get_protocol()) == protocol_count.end()) 
+			// Key doesn't exist 
+			protocol_count[pkt->get_protocol()] = 1;
+		else
+			// Key exists
+			protocol_count[pkt->get_protocol()] += 1;
+	}
+
+	// Settings 
+	pop_up->setWindowTitle("Packet Protocol Statistics");
+	for (auto &i : protocol_count) 
+		series->append(QString::fromStdString(i.first), i.second);
+
+	chart->addSeries(series);
+	chart->setTitle("Protocol Statistics");
+	chart->setAnimationOptions(QChart::AllAnimations);
+
+	chart->legend()->setMarkerShape(QLegend::MarkerShapeCircle);
+	chart->legend()->setAlignment(Qt::AlignRight);
+	chart->legend()->setShowToolTips(true);
+	chart->legend()->show();
+
+	chart_view->setChart(chart);
+	chart_view->setRenderHint(QPainter::Antialiasing);
+
+	// Connections
+	this->connect(series, &QPieSeries::hovered,
+			this, &Window::statistics_hover);
+
+	// Layout structure
+	layout->addWidget(chart_view);
+	
+	pop_up->resize(500,500);
+	pop_up->setLayout(layout);
+	pop_up->show();
+}
+
+void Window::statistics_hover(QPieSlice *slice, bool state) {
+	if (state) {
+		slice->setExploded(true);
+		slice->setLabelVisible(true);
+	} else {
+		slice->setExploded(false);
+		slice->setLabelVisible(false);
+	}
 }
 
 void Window::begin_capture() {

@@ -4,7 +4,8 @@
 
 TEMPLATE = app
 TARGET = ../build/pSnoopGui
-QT += gui widgets
+QT += gui widgets 
+QT += charts
 INCLUDEPATH += .
 
 # The following define makes your compiler warn you if you use any

@@ -5,7 +5,7 @@ A Level Project, PacketSnooper pSnoop
 
 Please note, you may have to fix the /usr/include/boost/spirit.hpp and /usr/include/boost/spirit/ files.
 ```
-sudo apt install qtchooser qt5-default libpcap-dev libboost-all-dev
+sudo apt install qtchooser qt5-default libpcap-dev libboost-all-dev libqt5charts5-dev 
 ```
 
 # Compile
