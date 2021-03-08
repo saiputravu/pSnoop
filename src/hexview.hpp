@@ -26,7 +26,7 @@ class HexView : public QTableWidget {
 		int get_cell_width() { return this->cell_width; }
 
 		// Be careful of usage, this could lead to overflows
-		void load_bytes(char *bytes, int len);
+		void load_bytes(unsigned char *bytes, int len);
 
 	private:
 		int cell_width;

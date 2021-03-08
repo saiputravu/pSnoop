@@ -427,7 +427,7 @@ void Window::restart_capture () {
 void Window::load_packet_bytes(int row, int col) {	
 	int frame = this->packet_table->item(row, 0)->text().toInt();
 	Packet *pkt = (*this->capture.get_packet_stream())[frame];
-	this->hex_view->load_bytes((char*)pkt->get_data(), 
+	this->hex_view->load_bytes(pkt->get_data(), 
 			pkt->get_header_len());
 }
 

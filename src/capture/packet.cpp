@@ -45,11 +45,12 @@ void Packet::parse() {
 }
 
 void TCPPacket::parse() {
+	// Ether_header --> Ip_Header --> Tcp_Header
+	// +sizeof()      +helen*32bits
 	this->tcp_header = (struct tcp_header *)(this->get_data() + 
 			sizeof(struct ether_header) + 
-			(unsigned int)(this->get_ip_header()->type_helen & 0xf));
+			4*(unsigned int)(this->get_ip_header()->type_helen & 0xf));
 }
-
 
 PacketStream::PacketStream(unsigned char error_type) : error_type(error_type) {
 

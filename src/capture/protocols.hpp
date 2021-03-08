@@ -48,7 +48,7 @@ struct ip_header {
 	unsigned int dest;			// Destination ip
 
 	// This is only valid when helen > 5 | Do NOT use sizeof() for this struct size, use helen*4
-	//unsigned int options_padding;	// Padding is all 00s, size depends on options
+	unsigned int options_padding;	// Padding is all 00s, size depends on options
 };
 
 // https://tools.ietf.org/html/rfc793#section-3.1
@@ -70,6 +70,8 @@ struct tcp_header {
 	unsigned short checksum; // Checksum - 16bit 1's complement of the 1's complement sum of all 16 bit words in header and text
 
 	unsigned short urgent_pointer;
+
+	// This is only valid some times
 	unsigned int options_padding; // Padding is all 00s, size depends on options
 };
 

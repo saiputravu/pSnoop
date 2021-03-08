@@ -1,7 +1,6 @@
 #include "hexview.hpp"
 
 HexView::HexView(QWidget *parent, int cell_width) : QTableWidget(parent), cell_width(cell_width) {
-
 	this->proto_item = new QTableWidgetItem();
 	this->proto_item->setTextAlignment(Qt::AlignCenter);
 	this->setItemPrototype(this->proto_item);
@@ -23,7 +22,7 @@ HexView::~HexView() {
 
 }
 
-void HexView::load_bytes(char *bytes, int len) {
+void HexView::load_bytes(unsigned char *bytes, int len) {
 	this->setRowCount(0);
 	this->setRowCount((int)(len / 8) + 1);
 

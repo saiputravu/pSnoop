@@ -102,6 +102,7 @@ class TCPPacket : public Packet {
 				unsigned char *data,
 				unsigned char error_type = Error::CLI
 				) : Packet(frame, header, data, error_type, "TCP") {
+			this->parse();
 		}
 
 		~TCPPacket() {} 
