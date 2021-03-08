@@ -101,8 +101,8 @@ void PacketStream::push_back(int frame,
 	//printf("Time To Live: %d\n", i_header->ttl);
 	//printf("Protocol: 0x%02x | %s\n", i_header->protocol, pkt->get_protocol().c_str());
 	//printf("Checksum: 0x%04x\n", i_header->checksum);
-	std::cout << "Source i: " << Utils::convert_ip(i_header->source) << std::endl;
-	std::cout << "Dest   i: " << Utils::convert_ip(i_header->dest) << std::endl;
+	//std::cout << "Source : " << Utils::convert_ip(i_header->source) << std::endl;
+	//std::cout << "Dest   : " << Utils::convert_ip(i_header->dest) << std::endl;
     //
 	//std::cout << "Protocol: " << pkt->get_protocol() << std::endl;
 }
