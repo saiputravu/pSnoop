@@ -31,7 +31,6 @@ SearchBox::~SearchBox() {
 }
 
 bool SearchBox::check_syntax(QString query_qstring) {
-	
 	// Parse string into a vector - also empty vector beforehand
 	std::string query_string = query_qstring.toUtf8().constData();
 	this->queries = std::vector<Parser::ast::query_struct>();
@@ -121,6 +120,15 @@ void SearchBox::on_submit() {
 		}
 		
 		// Reload packet table after filtered packets
+		if (this->stream->size() > 0)
+			emit reload_packets(this->stream);
+
+	} else if (this->textbox->text() == "") {
+		// If query is empty, filter nothing
+		for (unsigned int i = 0; i < this->stream->size(); ++i)
+			(*this->stream)[i]->set_filtered(false);
+		
+		// Reload table
 		if (this->stream->size() > 0)
 			emit reload_packets(this->stream);
 	}
