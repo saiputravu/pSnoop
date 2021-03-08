@@ -12,7 +12,10 @@ SearchBox::SearchBox(PacketStream *stream, QWidget *parent) : stream(stream), QW
 	this->h_splitter->setChildrenCollapsible(false);
 	this->submit->setText("Filter");
 
+	// On submit pressed or enter pressed
 	this->connect(this->submit, SIGNAL(clicked()),
+			this, SLOT(on_submit()));
+	this->connect(this->textbox, SIGNAL(returnPressed()),
 			this, SLOT(on_submit()));
 
 	this->connect(this->textbox, SIGNAL(textChanged(const QString &)),
@@ -36,10 +39,6 @@ bool SearchBox::check_syntax(QString query_qstring) {
 }
 
 void SearchBox::set_packet_filter(Packet *packet, Parser::ast::query_struct query, bool chain) {
-	//std::cout << "\t[QUERY]: " << query.key
-	//    << " | " << query.op
-	//    << " | " << query.val << std::endl;
-	
 	// If packet is already filtered, ignore it (chains queries rather than treat them as OR)
 	if (chain && packet->get_filtered()) {
 		return;
@@ -84,14 +83,18 @@ bool SearchBox::filter_query(int field, Parser::ast::query_struct query) {
 	// Parse the operator and the value fields on the packet.field
 	// Returns if packet is valid 
 	int value = std::stoi(query.val);
-	if (query.op == "==" || query.op == ">=" || query.op == "<=")
-		return field == value; // Equals to	
-	else if (query.op == ">" || query.op == ">=")
-		return field > value; // Less than (the equals to would have executed and returned)
-	else if (query.op == "<" || query.op == "<=")
-		return field < value; // Greater than 
+	if (query.op == "==")
+		return field == value;
+	else if (query.op == ">=")
+		return field >= value;
+	else if (query.op == ">")
+		return field > value; 
+	else if (query.op == "<=")
+		return field <= value;
+	else if (query.op == "<")
+		return field < value;
 	else if (query.op == "!=")
-		return field != value; // Not equal to
+		return field != value;
 
 	return false; // Should never be reached 
 }
@@ -99,6 +102,14 @@ bool SearchBox::filter_query(int field, Parser::ast::query_struct query) {
 void SearchBox::on_submit() {
 	if (this->queries.size() > 0) {
 		bool chain = this->queries.size() > 1; // check if multiple queries are chained
+		
+		if (chain) {
+			// Unfilter all packets
+			// This needs to be done as on consecutive chained queries it will ignore filtered packets on previous chained queries
+			for (unsigned int i = 0; i < this->stream->size(); ++i)
+				(*this->stream)[i]->set_filtered(false);
+		}
+
 		// Loop through each packet
 		for (unsigned int i = 0; i < this->stream->size(); ++i) {
 			// Apply each query onto that packet to set filtered flag
@@ -108,6 +119,8 @@ void SearchBox::on_submit() {
 						chain);
 			}
 		}
+		
+		// Reload packet table after filtered packets
 		if (this->stream->size() > 0)
 			emit reload_packets(this->stream);
 	}

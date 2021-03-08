@@ -165,6 +165,9 @@ class Window : public QMainWindow {
 
 		// Help Menu Actions
 		QAction *about_action;
+
+		// Pie chart labels
+		std::map<QPieSlice*,QString> chart_labels = std::map<QPieSlice*,QString>();
 		
 	signals:
 		void begin_capture_signal(bool *active);

@@ -207,11 +207,12 @@ void Window::init_layout() {
 			this, &Window::load_packet_bytes,
 			Qt::DirectConnection);
 
-	// Place holder, e_header, i_headers 
+	// Filter query packet search box
 	this->search_box = new SearchBox(this->capture.get_packet_stream(), this);
 	this->connect(this->search_box, &SearchBox::reload_packets, 
 			this->packet_table, &Table::reload_packets);
 
+	// Place holder, e_header, i_headers 
 	QPushButton *button2 = new QPushButton(this);
 	button2->setText("HelloWorld2");
 	
@@ -349,12 +350,15 @@ void Window::statistics() {
 	chart->setAnimationOptions(QChart::AllAnimations);
 
 	chart->legend()->setMarkerShape(QLegend::MarkerShapeCircle);
-	chart->legend()->setAlignment(Qt::AlignRight);
 	chart->legend()->setShowToolTips(true);
 	chart->legend()->show();
 
 	chart_view->setChart(chart);
 	chart_view->setRenderHint(QPainter::Antialiasing);
+	
+	// Fill up labels as a sort of cache for later use
+	for (auto &i : series->slices())
+		this->chart_labels[i] = i->label();
 
 	// Connections
 	this->connect(series, &QPieSeries::hovered,
@@ -363,7 +367,7 @@ void Window::statistics() {
 	// Layout structure
 	layout->addWidget(chart_view);
 	
-	pop_up->resize(500,500);
+	pop_up->resize(600,600);
 	pop_up->setLayout(layout);
 	pop_up->show();
 }
@@ -371,9 +375,11 @@ void Window::statistics() {
 void Window::statistics_hover(QPieSlice *slice, bool state) {
 	if (state) {
 		slice->setExploded(true);
+    	slice->setLabel(this->chart_labels[slice] + QString(" %1%").arg(100*slice->percentage(), 0, 'f', 2));
 		slice->setLabelVisible(true);
 	} else {
 		slice->setExploded(false);
+    	slice->setLabel(this->chart_labels[slice]);
 		slice->setLabelVisible(false);
 	}
 }
