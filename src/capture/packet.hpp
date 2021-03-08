@@ -18,8 +18,6 @@ class Packet {
 		Packet(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				struct ether_header *e_header,
-				struct ip_header *i_header,
 				unsigned char error_type = Error::CLI,
 				std::string prot = "UNKNOWN");
 		virtual ~Packet();
@@ -70,10 +68,8 @@ class IPPacket : public Packet {
 		IPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data, 
-				struct ether_header *e_header,
-				struct ip_header *i_header,
 				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, e_header, i_header, error_type, "IP") {
+				) : Packet(frame, header, data, error_type, "IP") {
 
 		}
 
@@ -88,10 +84,8 @@ class ICMPPacket : public Packet {
 		ICMPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				struct ether_header *e_header,
-				struct ip_header *i_header,
 				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, e_header, i_header, error_type, "ICMP") {
+				) : Packet(frame, header, data, error_type, "ICMP") {
 
 		}
 
@@ -106,16 +100,19 @@ class TCPPacket : public Packet {
 		TCPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				struct ether_header *e_header,
-				struct ip_header *i_header,
 				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, e_header, i_header, error_type, "TCP") {
-
+				) : Packet(frame, header, data, error_type, "TCP") {
 		}
 
 		~TCPPacket() {} 
 
 	private:
+		// Methods 
+		void parse() override;
+
+		// Attributes
+		struct tcp_header *tcp_header;
+
 };
 
 class UDPPacket : public Packet {
@@ -124,10 +121,8 @@ class UDPPacket : public Packet {
 		UDPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				struct ether_header *e_header,
-				struct ip_header *i_header,
 				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, e_header, i_header, error_type, "UDP") {
+				) : Packet(frame, header, data, error_type, "UDP") {
 
 		}
 
@@ -142,10 +137,8 @@ class ARPPacket : public Packet {
 		ARPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				struct ether_header *e_header,
-				struct ip_header *i_header,
 				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, e_header, i_header, error_type, "ARP") {
+				) : Packet(frame, header, data, error_type, "ARP") {
 
 		}
 
