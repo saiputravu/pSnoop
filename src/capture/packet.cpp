@@ -4,9 +4,11 @@ Packet::Packet(int frame,
 		struct pcap_pkthdr header, 
 		unsigned char *data,
 		unsigned char error_type,
-		std::string prot) : frame(frame), 
+		std::string prot, 
+		std::string colour) : frame(frame), 
 	protocol(prot), 
-	error_type(error_type) {
+	error_type(error_type),
+	colour(colour) {
 
 
 	// Allocate heap space for header struct and set address as data
@@ -50,6 +52,43 @@ void TCPPacket::parse() {
 	this->tcp_header = (struct tcp_header *)(this->get_data() + 
 			sizeof(struct ether_header) + 
 			4*(unsigned int)(this->get_ip_header()->type_helen & 0xf));
+
+	// Set any general information 
+	std::string information = this->get_info();
+	information += "SrcPort: [";
+	information += std::to_string(htons(this->tcp_header->source_port));
+	information += "]";
+
+	information += " | ";
+	
+	information += "DstPort: [";
+	information += std::to_string(htons(this->tcp_header->dest_port));
+	information +=  "]";
+
+	information += " | ";
+
+	// TCP Flags 
+	unsigned short control = htons(this->tcp_header->offset_resv_control);
+	if (control & 0b100000)
+		information += "URG ";
+	if (control & 0b010000)
+		information += "ACK ";
+	if (control & 0b001000)
+		information += "PSH ";
+	if (control & 0b000100)
+		information += "RST ";
+	if (control & 0b000010)
+		information += "SYN ";
+	if (control & 0b000001)
+		information += "FIN ";
+
+	this->set_info(information);
+}	
+
+void HTTPPacket::parse() {
+	// Tcp_header + data offset * 4
+	this->http_payload = (unsigned char *)(this->get_tcp_header() + 
+			4*(unsigned int)(htons(this->get_tcp_header()->offset_resv_control)>>12));
 }
 
 PacketStream::PacketStream(unsigned char error_type) : error_type(error_type) {
@@ -59,6 +98,27 @@ PacketStream::PacketStream(unsigned char error_type) : error_type(error_type) {
 PacketStream::~PacketStream() {
 	for (unsigned int i = 0; i < this->packet_stream.size(); ++i) 
 		delete this->packet_stream[i];
+}
+
+Packet *PacketStream::parse_tcp_packet(int frame, 
+		struct pcap_pkthdr header, 
+		unsigned char *data) { 
+	
+	struct ip_header *i_header = (struct ip_header *)(data + sizeof(ether_header));
+	struct tcp_header *t_header = (struct tcp_header *)(data + sizeof(struct ether_header) +
+			4*(unsigned int)(i_header->type_helen & 0x0f));
+
+	// Source port or destination port to detect protocol 
+	if (htons(t_header->source_port) == 80 || htons(t_header->dest_port) == 80) {
+		// HTTP protocol 
+		return new HTTPPacket(frame, header, data, this->error_type);
+	} else if (htons(t_header->source_port) == 443 || htons(t_header->dest_port) == 443) {
+		// HTTPS protocol
+		return new HTTPPacket(frame, header, data, this->error_type, "HTTPS"); // Return a HTTP packet for now?
+	}
+
+	// No known TCP protocols matched
+	return new TCPPacket(frame, header, data, this->error_type);
 }
 
 void PacketStream::push_back(int frame, 
@@ -71,26 +131,26 @@ void PacketStream::push_back(int frame,
 	Packet *pkt;
 	if (htons(e_header->type) == ETHERTYPE_IP) {
 		// Parse IP Header 
-		// Ensure Type == 4 && HeLen == 5 otherwise we don't deal with typical data
+		// Ensure Type == 4 otherwise we don't deal with typical data
 		switch(i_header->protocol) {
 			case ICMP:
-				pkt = new ICMPPacket(frame, header, data, error_type);
+				pkt = new ICMPPacket(frame, header, data, this->error_type);
 				break;
 			case TCP:
-				pkt = new TCPPacket(frame, header, data, error_type);
+				pkt = this->parse_tcp_packet(frame, header, data); // Separately parse TCP protocols
 				break;
 			case UDP:
-				pkt = new UDPPacket(frame, header, data, error_type);
+				pkt = new UDPPacket(frame, header, data, this->error_type);
 				break;
 			default:
-				pkt = new IPPacket(frame, header, data, error_type);
+				pkt = new IPPacket(frame, header, data, this->error_type);
 				break;
 		}
 
 	} else if (htons(e_header->type) == ETHERTYPE_ARP) {
-		pkt = new ARPPacket(frame, header, data, error_type);
+		pkt = new ARPPacket(frame, header, data, this->error_type);
 	} else
-		pkt = new Packet(frame, header, data, error_type);	// Create new unknown packet object
+		pkt = new Packet(frame, header, data, this->error_type);	// Create new unknown packet object
 
 	this->packet_stream.push_back(pkt);	// Add pointer to the end of stream
 

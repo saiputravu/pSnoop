@@ -62,7 +62,7 @@ struct tcp_header {
 	unsigned int ack;	// Acknowledge number 
 						// If ACK flag set, this contains value of next sequence number. Always sent once a connection is established
 
-	unsigned short offset_resv_control; // 0b1111 ---- ---- ---- Data offset : Number of 32bit words in TCP header
+	unsigned short offset_resv_control; // 0b1111 ---- ---- ---- Data offset : Number of 32bit words in TCP header (TCP header len = 4*data offset)
 										// 0b---- 1111 11-- ---- Reserved
 										// 0b---- ---- --11 1111 TCP Flags | URG,ACK,PSH,RST,SYN,FIN
 	

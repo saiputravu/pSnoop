@@ -19,7 +19,9 @@ class Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data,
 				unsigned char error_type = Error::CLI,
-				std::string prot = "UNKNOWN");
+				std::string prot = "UNKNOWN",
+				std::string fgcolour = "",
+				std::string bgcolour = "");
 		virtual ~Packet();
 
 		// Getters
@@ -31,6 +33,8 @@ class Packet {
 		bool get_filtered() { return this->filtered; }
 		std::string get_protocol() { return this->protocol; }
 		std::string get_info() { return this->info; }
+		std::string get_fgcolour() { return this->fgcolour; } 
+		std::string get_bgcolour() { return this->bgcolour; } 
 		struct ether_header *get_ether_header() { return this->ether_header; }
 		struct ip_header *get_ip_header() { 
 			if (this->ip_header)
@@ -40,10 +44,13 @@ class Packet {
 
 		// Setters
 		void set_filtered(bool flag) { this->filtered = flag; }
+		void set_info(std::string information) { this->info = information; }
+		void set_color(std::string col) { this->colour = col; }
 
-	private:
 		// Methods
 		virtual void parse();
+
+	private:
 
 		// Properties
 
@@ -56,6 +63,8 @@ class Packet {
 
 		std::string protocol = "";				// Protocol Type
 		std::string info = "";					// Extra information filled at instantiation
+		std::string fgcolour = "";				// Packet displayed colour Foreground (for GUI)
+		std::string bgcolour = "";				// Packet displayed colour Background (for GUI)
 		bool filtered = false;					// Filter flag
 
 		unsigned char error_type;
@@ -68,8 +77,10 @@ class IPPacket : public Packet {
 		IPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data, 
-				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, error_type, "IP") {
+				unsigned char error_type = Error::CLI,
+				std::string fgcolour = "",
+				std::string bgcolour = "" 
+				) : Packet(frame, header, data, error_type, "IP", fgcolour, bgcolour) {
 
 		}
 
@@ -84,8 +95,10 @@ class ICMPPacket : public Packet {
 		ICMPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, error_type, "ICMP") {
+				unsigned char error_type = Error::CLI,
+				std::string fgcolour = "",
+				std::string bgcolour = ""
+				) : Packet(frame, header, data, error_type, "ICMP", fgcolour, bgcolour) {
 
 		}
 
@@ -100,20 +113,49 @@ class TCPPacket : public Packet {
 		TCPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, error_type, "TCP") {
+				unsigned char error_type = Error::CLI,
+				std::string prot = "TCP",
+				std::string fgcolour = "",
+				std::string bgcolour = ""
+				) : Packet(frame, header, data, error_type, prot, fgcolour, bgcolour) {
 			this->parse();
 		}
 
 		~TCPPacket() {} 
 
-	private:
+		// Getters 
+		struct tcp_header *get_tcp_header() { return tcp_header; }
+
 		// Methods 
 		void parse() override;
+
+	private:
 
 		// Attributes
 		struct tcp_header *tcp_header;
 
+};
+
+class HTTPPacket : public TCPPacket {
+	public:
+		HTTPPacket(int frame,
+				struct pcap_pkthdr header,
+				unsigned char *data,
+				unsigned char error_type = Error::CLI,
+				std::string prot = "HTTP",
+				std::string fgcolour = "",
+				std::string bgcolour = ""
+				) : TCPPacket(frame, header, data, error_type, prot, fgcolour, bgcolour) {
+			this->parse();
+		}
+		
+		// Methods 
+		void parse() override;
+
+	private:
+
+		// Attributes 
+		unsigned char *http_payload;
 };
 
 class UDPPacket : public Packet {
@@ -122,8 +164,10 @@ class UDPPacket : public Packet {
 		UDPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, error_type, "UDP") {
+				unsigned char error_type = Error::CLI, 
+				std::string fgcolour = "",
+				std::string bgcolour = ""
+				) : Packet(frame, header, data, error_type, "UDP", fgcolour, bgcolour) {
 
 		}
 
@@ -138,8 +182,10 @@ class ARPPacket : public Packet {
 		ARPPacket(int frame,
 				struct pcap_pkthdr header,
 				unsigned char *data,
-				unsigned char error_type = Error::CLI
-				) : Packet(frame, header, data, error_type, "ARP") {
+				unsigned char error_type = Error::CLI,
+				std::string fgcolour = "",
+				std::string bgcolour = ""
+				) : Packet(frame, header, data, error_type, "ARP", fgcolour, bgcolour) {
 
 		}
 
@@ -173,8 +219,12 @@ class PacketStream {
 		unsigned int size() { return (unsigned int)this->packet_stream.size(); }
 
 	private:
-		// Properties 
+		// Methods 
+		Packet *parse_tcp_packet(int frame, 
+				struct pcap_pkthdr header, 
+				unsigned char *data);
 
+		// Properties 
 		std::vector<Packet *> packet_stream;	// List of captured packet objects 
 		unsigned char error_type;
 

@@ -69,4 +69,29 @@ void HexView::load_bytes(unsigned char *bytes, int len) {
 		if ( !((int)(i / 8) & 1) )
 			this->item((int)(i/8), i%8)->setBackground(col);
 	}
+
+	// Print output on every packet click
+	
+	//struct ip_header *i_header = (struct ip_header *)(bytes + sizeof(ether_header));
+	//struct tcp_header *t_header = (struct tcp_header *)(bytes + sizeof(struct ether_header) +
+	//        4*(unsigned int)(i_header->type_helen & 0x0f));
+	//printf("Source port: [%d] | Destination port: [%d]\n", htons(t_header->source_port), htons(t_header->dest_port));
+	//printf("Sequence: [%x] | Ack: [%x]\n", htonl(t_header->seq), htonl(t_header->ack));
+	//printf("Flags: ");
+    //
+	//unsigned short control = htons(t_header->offset_resv_control);
+	//if (control & 0b100000)
+	//    printf("URG ");
+	//if (control & 0b010000)
+	//    printf("ACK ");
+	//if (control & 0b001000)
+	//    printf("PSH ");
+	//if (control & 0b000100)
+	//    printf("RST ");
+	//if (control & 0b000010)
+	//    printf("SYN ");
+	//if (control & 0b000001)
+	//    printf("FIN ");
+	//printf("\n");
+	//printf("Data offset: [%x | %d]\n", control&0xf000, control>>12);
 }

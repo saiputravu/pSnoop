@@ -48,13 +48,6 @@ class Table : public QTableWidget {
 		unsigned int row_height;
 		int endian;
 
-		// Colours for packets
-		std::map<std::string, QColor> packet_colors =
-		{
-			{"random", QColor(0xc2, 0xff, 0xeb)},
-			{"tcp", QColor(0x99, 0xc2, 0x4d)}
-		};
-
 	signals:
 
 	public slots:

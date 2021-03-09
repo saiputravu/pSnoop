@@ -62,12 +62,13 @@ void Table::keyPressEvent(QKeyEvent *event) {
 }
 
 void Table::append(QStringList items) {
-	if (items.count() != this->labels.count())
+	// Final item is packet colour
+	if (items.count() - 1 != this->labels.count())
 		return;
 	
 	// Add new row
 	this->insertRow(this->rowCount());
-	for (int i = 0; i < items.count(); ++i) {
+	for (int i = 0; i < items.count() - 1; ++i) {
 		// Set each respective item
 		this->setItem(this->rowCount() - 1, i,
 			new QTableWidgetItem(items.at(i)));
@@ -76,8 +77,8 @@ void Table::append(QStringList items) {
 		this->item(this->rowCount() - 1, i)->setFlags(this->item(this->rowCount() - 1, i)->flags() ^ Qt::ItemIsEditable);
 
 		// Set background colour
-		if (this->rowCount() & 1)
-			this->item(this->rowCount() - 1, i)->setBackground(this->packet_colors["random"]);
+		if (items[items.count() - 1] != "")
+			this->item(this->rowCount() - 1, i)->setBackground(QColor(items[items.count() - 1]));
 	}
 }
 
@@ -113,6 +114,7 @@ void Table::append_packet(Packet *packet) {
 	items.append(QString::fromStdString(Utils::convert_ip(dest)));
 	items.append(QString::fromStdString(packet->get_protocol()));
 	items.append(QString::fromStdString(packet->get_info()));
+	items.append(QString::fromStdString(packet->get_colour()));
 
 	this->append(items);
 }
