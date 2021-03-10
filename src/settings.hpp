@@ -15,6 +15,7 @@
 #include <QFont>
 #include <QString>
 #include <QStyleFactory>
+#include <QFileDialog>
 
 #include <string>
 #include <sstream>
@@ -30,8 +31,14 @@ class Settings : public QWidget {
 		~Settings();
 
 		// Getters 
-		QString get(std::string key);
+		std::string get(std::string key);
+		std::map<std::string, std::string> *get_config_dict() { return &this->config; }
 		
+		// Setters 
+		void store_value(std::string key, std::string value) {
+			this->config[key] = value;
+		}
+
 		// Methods
 		void generate_default_config();
 
@@ -39,10 +46,9 @@ class Settings : public QWidget {
 
 	private:
 		// Properties
-		std::string config_file = "\0";
-		std::map<std::string, QString> config;
+		std::string config_file = "./pSnoop.cfg";
+		std::map<std::string, std::string> config;
 
-		void store_value(std::string key, std::string value);
 
 		// Qt Objects
 		QHBoxLayout *container;
@@ -59,6 +65,7 @@ class Settings : public QWidget {
 		// Tabs
 		void tab_manager(QListWidgetItem *item);
 		void general_tab();
+		void general_tab_button(QLineEdit *filepath);
 		void appearance_tab();
 
 		// Re-implemented

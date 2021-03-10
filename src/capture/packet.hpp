@@ -4,9 +4,11 @@
 #include <pcap.h>
 #include <stdlib.h>
 #include <string.h>
+#include <algorithm>
 #include <iostream>
 #include <sys/time.h>
 #include <vector>
+#include <map>
 #include <arpa/inet.h>
 
 #include "protocols.hpp"
@@ -45,7 +47,8 @@ class Packet {
 		// Setters
 		void set_filtered(bool flag) { this->filtered = flag; }
 		void set_info(std::string information) { this->info = information; }
-		void set_color(std::string col) { this->colour = col; }
+		void set_fgcolor(std::string col) { this->fgcolour = col; }
+		void set_bgcolor(std::string col) { this->bgcolour = col; }
 
 		// Methods
 		virtual void parse();
@@ -78,9 +81,10 @@ class IPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data, 
 				unsigned char error_type = Error::CLI,
+				std::string prot = "IP",
 				std::string fgcolour = "",
 				std::string bgcolour = "" 
-				) : Packet(frame, header, data, error_type, "IP", fgcolour, bgcolour) {
+				) : Packet(frame, header, data, error_type, prot, fgcolour, bgcolour) {
 
 		}
 
@@ -96,9 +100,10 @@ class ICMPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data,
 				unsigned char error_type = Error::CLI,
+				std::string prot = "ICMP",
 				std::string fgcolour = "",
 				std::string bgcolour = ""
-				) : Packet(frame, header, data, error_type, "ICMP", fgcolour, bgcolour) {
+				) : Packet(frame, header, data, error_type, prot, fgcolour, bgcolour) {
 
 		}
 
@@ -165,9 +170,10 @@ class UDPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data,
 				unsigned char error_type = Error::CLI, 
+				std::string prot = "UDP",
 				std::string fgcolour = "",
 				std::string bgcolour = ""
-				) : Packet(frame, header, data, error_type, "UDP", fgcolour, bgcolour) {
+				) : Packet(frame, header, data, error_type, prot, fgcolour, bgcolour) {
 
 		}
 
@@ -183,9 +189,10 @@ class ARPPacket : public Packet {
 				struct pcap_pkthdr header,
 				unsigned char *data,
 				unsigned char error_type = Error::CLI,
+				std::string prot = "ARP",
 				std::string fgcolour = "",
 				std::string bgcolour = ""
-				) : Packet(frame, header, data, error_type, "ARP", fgcolour, bgcolour) {
+				) : Packet(frame, header, data, error_type, prot, fgcolour, bgcolour) {
 
 		}
 
@@ -217,6 +224,8 @@ class PacketStream {
 		}
 
 		unsigned int size() { return (unsigned int)this->packet_stream.size(); }
+	
+		void set_config(std::map<std::string, std::string> *config) { this->config = config; }
 
 	private:
 		// Methods 
@@ -224,9 +233,16 @@ class PacketStream {
 				struct pcap_pkthdr header, 
 				unsigned char *data);
 
+		template <class T>
+		T *new_packet(int frame, 
+				struct pcap_pkthdr header,
+				unsigned char *data,
+				std::string protocol);
+
 		// Properties 
 		std::vector<Packet *> packet_stream;	// List of captured packet objects 
 		unsigned char error_type;
+		std::map<std::string, std::string> *config = nullptr;
 
 };
 

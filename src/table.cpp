@@ -62,13 +62,13 @@ void Table::keyPressEvent(QKeyEvent *event) {
 }
 
 void Table::append(QStringList items) {
-	// Final item is packet colour
-	if (items.count() - 1 != this->labels.count())
+	// Final two items are packet foreground and background colour
+	if (items.count() - 2 != this->labels.count())
 		return;
 	
 	// Add new row
 	this->insertRow(this->rowCount());
-	for (int i = 0; i < items.count() - 1; ++i) {
+	for (int i = 0; i < items.count() - 2; ++i) {
 		// Set each respective item
 		this->setItem(this->rowCount() - 1, i,
 			new QTableWidgetItem(items.at(i)));
@@ -79,6 +79,8 @@ void Table::append(QStringList items) {
 		// Set background colour
 		if (items[items.count() - 1] != "")
 			this->item(this->rowCount() - 1, i)->setBackground(QColor(items[items.count() - 1]));
+		if (items[items.count() - 2] != "")
+			this->item(this->rowCount() - 1, i)->setForeground(QColor(items[items.count() - 2]));
 	}
 }
 
@@ -114,7 +116,8 @@ void Table::append_packet(Packet *packet) {
 	items.append(QString::fromStdString(Utils::convert_ip(dest)));
 	items.append(QString::fromStdString(packet->get_protocol()));
 	items.append(QString::fromStdString(packet->get_info()));
-	items.append(QString::fromStdString(packet->get_colour()));
+	items.append(QString::fromStdString(packet->get_fgcolour()));
+	items.append(QString::fromStdString(packet->get_bgcolour()));
 
 	this->append(items);
 }

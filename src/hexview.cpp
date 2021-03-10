@@ -72,6 +72,7 @@ void HexView::load_bytes(unsigned char *bytes, int len) {
 
 	// Print output on every packet click
 	
+	//Utils::hexdump(bytes, len);
 	//struct ip_header *i_header = (struct ip_header *)(bytes + sizeof(ether_header));
 	//struct tcp_header *t_header = (struct tcp_header *)(bytes + sizeof(struct ether_header) +
 	//        4*(unsigned int)(i_header->type_helen & 0x0f));

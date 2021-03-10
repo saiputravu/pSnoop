@@ -16,6 +16,7 @@
 #include <arpa/inet.h>
 
 #include "capture/protocols.hpp"
+#include "capture/Utils/utils.hpp"
 
 class HexView : public QTableWidget {
 	Q_OBJECT;

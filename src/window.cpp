@@ -25,14 +25,15 @@ void Window::init_general() {
 
 	// Setup settings
 	this->settings = new Settings("pSnoop.cfg");
+	this->capture.get_packet_stream()->set_config(this->settings->get_config_dict()); // Give packet stream the settings dictionary
 
 	// Setting application wide font
-	QFont font(this->settings->get("font"));
+	QFont font(QString::fromStdString(this->settings->get("font")));
 	font.setStyleHint(QFont::Monospace);
 	font.setPointSize(10);
-	if (this->settings->get("fontsize") != QString("Bad")){
+	if (this->settings->get("fontsize") != "Bad"){
 		bool ok;
-		int fontsize = this->settings->get("fontsize").toInt(&ok, 10);
+		int fontsize = QString::fromStdString(this->settings->get("fontsize")).toInt(&ok, 10);
 		if (ok)
 			font.setPointSize(fontsize);
 	}
@@ -41,7 +42,6 @@ void Window::init_general() {
 
 	// Setting theme
 	QApplication::setStyle("fusion");
-
 }
 
 void Window::init_menu() {
@@ -212,7 +212,7 @@ void Window::init_layout() {
 	this->connect(this->search_box, &SearchBox::reload_packets, 
 			this->packet_table, &Table::reload_packets);
 
-	// Place holder, e_header, i_headers 
+	// Place holder
 	QPushButton *button2 = new QPushButton(this);
 	button2->setText("HelloWorld2");
 	
@@ -432,7 +432,7 @@ void Window::load_packet_bytes(int row, int col) {
 }
 
 void Window::error_pop_up (std::string error, std::string title) {
-	QFont local_font(this->settings->get("font"));
+	QFont local_font(QString::fromStdString(this->settings->get("font")));
 	local_font.setPointSize(10);
 
 	QWidget *pop_up = new QWidget();
@@ -456,7 +456,7 @@ void Window::not_implemented() {
 }
 
 void Window::about() {
-	QFont local_font(this->settings->get("font"));
+	QFont local_font(QString::fromStdString(this->settings->get("font")));
 	local_font.setBold(true);
 	local_font.setPointSize(12);
 
