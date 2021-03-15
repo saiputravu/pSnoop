@@ -11,6 +11,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QListWidget>
+#include <QTreeWidget>
 #include <QLabel>
 
 #include <QMenu>
@@ -42,6 +43,7 @@
 #include "table.hpp"
 #include "settings.hpp"
 #include "hexview.hpp"
+#include "tree.hpp"
 #include "searchbox.hpp"
 #include "capture/networking.hpp"
 #include "capture/packet.hpp"
@@ -117,8 +119,9 @@ class Window : public QMainWindow {
 		// General Properties
 		Settings *settings;
 
-		Table *packet_table;
+		PacketTable *packet_table;
 		HexView *hex_view;
+		PacketTree *packet_tree;
 		SearchBox *search_box;
 		QSplitter *h_splitter;
 		QSplitter *v_splitter;
@@ -191,6 +194,7 @@ class Window : public QMainWindow {
 
 		// Pane related slots
 		void load_packet_bytes(int row, int col);
+		void load_packet_tree(int row, int col);
 };
 
 #endif // WINDOW_H

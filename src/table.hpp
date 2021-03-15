@@ -24,14 +24,14 @@
 #include "settings.hpp"
 #include "capture/packet.hpp"
 
-class Table : public QTableWidget {
+class PacketTable : public QTableWidget {
 	Q_OBJECT;
 
 	public:
-		Table(QWidget *parent = nullptr, 
+		PacketTable(QWidget *parent = nullptr, 
 				unsigned int row_height = 0,
 				int endian = 0);
-		~Table();
+		~PacketTable();
 
 		// Getters 
 		QStringList get_labels() { return this->labels; }

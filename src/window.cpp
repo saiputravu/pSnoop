@@ -194,32 +194,39 @@ void Window::init_layout() {
 	this->v_splitter = new QSplitter(Qt::Horizontal, this);
 
 	// Packet table object & setup add new packet on receiving new packet
-	this->packet_table = new Table(this);
+	this->packet_table = new PacketTable(this);
 	this->connect(&this->capture, &Networking::packet_recv,
-			this->packet_table, &Table::append_packet);
+			this->packet_table, &PacketTable::append_packet);
 
 	// HexView object
 	this->hex_view = new HexView(this);
 	this->hex_view->setMaximumSize(hex_view->get_cell_width() * (8 + 7),
 			this->height()+4000);
 
-	this->connect(this->packet_table, &Table::cellClicked,
+	this->connect(this->packet_table, &PacketTable::cellClicked,
 			this, &Window::load_packet_bytes,
 			Qt::DirectConnection);
 
 	// Filter query packet search box
 	this->search_box = new SearchBox(this->capture.get_packet_stream(), this);
 	this->connect(this->search_box, &SearchBox::reload_packets, 
-			this->packet_table, &Table::reload_packets);
+			this->packet_table, &PacketTable::reload_packets);
 
-	// Place holder
-	QPushButton *button2 = new QPushButton(this);
-	button2->setText("HelloWorld2");
-	
+	// Treeview for packet structure
+	this->packet_tree = new PacketTree(this);
+	this->packet_tree->add_tree_root(QString("Root1"), QString("Value1"));
+	this->packet_tree->add_tree_root(QString("Root2"), QString("Value2"));
+
+	this->packet_tree->add_tree_child((std::vector<unsigned int>){0}, QString("Child1"), QString("ValueChild1"));
+	this->packet_tree->add_tree_child((std::vector<unsigned int>){0, 0}, QString("ChildChild1"), QString("ValueChildChild1"));
+
+	this->connect(this->packet_table, &PacketTable::cellClicked, 
+			this, &Window::load_packet_tree);
+
 	// Right hand side
 	this->h_splitter->addWidget(this->packet_table);
 	this->h_splitter->addWidget(this->search_box);
-	this->h_splitter->addWidget(button2);
+	this->h_splitter->addWidget(this->packet_tree);
 
 	// Left hand side
 	this->v_splitter->addWidget(this->hex_view);
@@ -427,8 +434,18 @@ void Window::restart_capture () {
 void Window::load_packet_bytes(int row, int col) {	
 	int frame = this->packet_table->item(row, 0)->text().toInt();
 	Packet *pkt = (*this->capture.get_packet_stream())[frame];
+	
+	// Load bytes in the hexview 
 	this->hex_view->load_bytes(pkt->get_data(), 
 			pkt->get_header_len());
+}
+
+void Window::load_packet_tree(int row, int col) {
+	int frame = this->packet_table->item(row, 0)->text().toInt();
+	Packet *pkt = (*this->capture.get_packet_stream())[frame];
+	
+	// Load tree into the treeview
+	this->packet_tree->load_tree(pkt->get_tree());
 }
 
 void Window::error_pop_up (std::string error, std::string title) {

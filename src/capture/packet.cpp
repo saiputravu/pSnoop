@@ -35,6 +35,9 @@ Packet::Packet(int frame,
 
 	// Parse the data
 	this->parse();
+
+	// Setup tree structure 
+	this->setup_tree();
 }
 
 Packet::~Packet() {
@@ -93,6 +96,28 @@ void HTTPPacket::parse() {
 			4*(unsigned int)(htons(this->get_tcp_header()->offset_resv_control)>>12));
 }
 
+void Packet::setup_tree() {
+	this->tree = new TreeStructure();
+	unsigned int root_index;
+
+	// Ether header 
+	this->tree->add_root_node("Ether Header", "");
+
+	root_index = this->tree->get_tree_root_count() - 1;
+	this->tree->add_child_node({root_index}, "Source MAC Address", "DE:AD:BE:EF:BA:AD");
+	this->tree->add_child_node({root_index}, "Destination MAC Address", "DE:AD:BE:EF:BA:AD");
+	this->tree->add_child_node({root_index}, "Ether Type", "0xtest123");
+
+	this->tree->add_child_node({root_index,0}, "Test123", "Value123");
+
+	// IP header
+	this->tree->add_root_node("IP Header", "");
+
+	root_index = this->tree->get_tree_root_count() - 1;
+	this->tree->add_child_node({root_index}, "Source", "192.168.0.69");
+	this->tree->add_child_node({root_index}, "Destination", "192.168.0.1");
+}
+
 PacketStream::PacketStream(unsigned char error_type) : error_type(error_type) {
 
 }
@@ -129,15 +154,14 @@ Packet *PacketStream::parse_tcp_packet(int frame,
 
 	unsigned int payload_offset = (unsigned int)(sizeof(struct ether_header) + 
 				4*(unsigned int)(i_header->type_helen&0x0f) +
-				4*(unsigned int)(htons(t_header->offset_resv_control)));
+				4*(unsigned int)(htons(t_header->offset_resv_control) >> 12));
 
 	if (header.len == payload_offset)
 		// TCP packet has no data
 		return this->new_packet<TCPPacket>(frame, header, data, "TCP");
 
-	char *payload = (char *)(data + sizeof(struct ether_header) + 
-			4*(unsigned int)(i_header->type_helen&0x0f) + 
-			4*(unsigned int)(htons(t_header->offset_resv_control) >> 12));
+	// TCP packet payload - application level protocols
+	char *payload = (char *)(data + payload_offset);
 
 	// Source port or destination port to detect protocol 
 	if (strncmp("HTTP", payload, 4) == 0 || strncmp("GET", payload, 3) == 0 || strncmp("POST", payload, 4) == 0 || strncmp("PUT", payload, 3) == 0 || strncmp("DELETE", payload, 6) == 0) {

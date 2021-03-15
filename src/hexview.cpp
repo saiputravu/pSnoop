@@ -76,6 +76,12 @@ void HexView::load_bytes(unsigned char *bytes, int len) {
 	//struct ip_header *i_header = (struct ip_header *)(bytes + sizeof(ether_header));
 	//struct tcp_header *t_header = (struct tcp_header *)(bytes + sizeof(struct ether_header) +
 	//        4*(unsigned int)(i_header->type_helen & 0x0f));
+	//unsigned int payload_offset = (unsigned int)(sizeof(struct ether_header) +
+	//            4*(unsigned int)(i_header->type_helen&0x0f) +
+	//            4*(unsigned int)(htons(t_header->offset_resv_control) >> 12));
+	//char *payload = (char *)(bytes + payload_offset);
+	//Utils::hexdump((unsigned char *)payload, len-payload_offset); 
+	//printf("Payload:\n%s\n", payload);
 	//printf("Source port: [%d] | Destination port: [%d]\n", htons(t_header->source_port), htons(t_header->dest_port));
 	//printf("Sequence: [%x] | Ack: [%x]\n", htonl(t_header->seq), htonl(t_header->ack));
 	//printf("Flags: ");

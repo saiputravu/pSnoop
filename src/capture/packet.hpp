@@ -12,6 +12,7 @@
 #include <arpa/inet.h>
 
 #include "protocols.hpp"
+#include "structure.hpp"
 #include "Utils/error.hpp"
 #include "Utils/utils.hpp"
 
@@ -32,6 +33,7 @@ class Packet {
 		time_t get_header_timestamp() { return this->header->ts.tv_sec; }
 		unsigned char *get_data() { return this->data; }
 		unsigned char *get_packet() { return this->data; }
+		TreeStructure *get_tree() { return this->tree; }
 		bool get_filtered() { return this->filtered; }
 		std::string get_protocol() { return this->protocol; }
 		std::string get_info() { return this->info; }
@@ -52,6 +54,7 @@ class Packet {
 
 		// Methods
 		virtual void parse();
+		virtual void setup_tree();
 
 	private:
 
@@ -63,6 +66,7 @@ class Packet {
 
 		struct ether_header *ether_header;
 		struct ip_header *ip_header;
+		TreeStructure *tree;
 
 		std::string protocol = "";				// Protocol Type
 		std::string info = "";					// Extra information filled at instantiation
@@ -160,7 +164,7 @@ class HTTPPacket : public TCPPacket {
 	private:
 
 		// Attributes 
-		unsigned char *http_payload;
+		unsigned char *http_payload = nullptr;
 };
 
 class UDPPacket : public Packet {

@@ -1,6 +1,6 @@
 #include "table.hpp"
 
-Table::Table(QWidget *parent, 
+PacketTable::PacketTable(QWidget *parent, 
 		unsigned int row_height,
 		int endian) : QTableWidget(parent), row_height(row_height), endian(endian){
 	this->labels << "Frame"
@@ -47,11 +47,11 @@ Table::Table(QWidget *parent,
 
 }
 
-Table::~Table() {
+PacketTable::~PacketTable() {
 
 }
 
-void Table::keyPressEvent(QKeyEvent *event) {
+void PacketTable::keyPressEvent(QKeyEvent *event) {
 	// Super class implementation
 	QTableWidget::keyPressEvent(event);
 
@@ -61,7 +61,7 @@ void Table::keyPressEvent(QKeyEvent *event) {
 	}
 }
 
-void Table::append(QStringList items) {
+void PacketTable::append(QStringList items) {
 	// Final two items are packet foreground and background colour
 	if (items.count() - 2 != this->labels.count())
 		return;
@@ -84,7 +84,7 @@ void Table::append(QStringList items) {
 	}
 }
 
-void Table::reload_packets(PacketStream *stream) {
+void PacketTable::reload_packets(PacketStream *stream) {
 	// Clear table
 	this->setRowCount(0);
 
@@ -94,7 +94,7 @@ void Table::reload_packets(PacketStream *stream) {
 
 }
 
-void Table::append_packet(Packet *packet) {
+void PacketTable::append_packet(Packet *packet) {
 	// Don't add packet if there is a filter applied
 	if (packet->get_filtered())
 		return;

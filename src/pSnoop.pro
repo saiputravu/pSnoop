@@ -29,12 +29,14 @@ QMAKE_CXXFLAGS += -fconcepts
 # Input
 HEADERS += window.hpp \
 	table.hpp \ 
-	hexview.hpp \
+	hexview.hpp \ 
+	tree.hpp \ 
 	searchbox.hpp \
 	settings.hpp \
 	capture/networking.hpp \
 	capture/packet.hpp \
 	capture/protocols.hpp \
+	capture/structure.hpp \
 	capture/Utils/error.hpp \
 	capture/Utils/utils.hpp 
 
@@ -42,6 +44,7 @@ SOURCES += main.cpp \
 	window.cpp \
 	table.cpp \
 	hexview.cpp \
+	tree.cpp \ 
 	searchbox.cpp \
 	settings.cpp \
 	capture/networking.cpp \
