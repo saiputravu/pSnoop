@@ -128,6 +128,7 @@ class TCPPacket : public Packet {
 				std::string bgcolour = ""
 				) : Packet(frame, header, data, error_type, prot, fgcolour, bgcolour) {
 			this->parse();
+			this->setup_tree();
 		}
 
 		~TCPPacket() {} 
@@ -137,6 +138,7 @@ class TCPPacket : public Packet {
 
 		// Methods 
 		void parse() override;
+		void setup_tree() override;
 
 	private:
 
@@ -156,10 +158,12 @@ class HTTPPacket : public TCPPacket {
 				std::string bgcolour = ""
 				) : TCPPacket(frame, header, data, error_type, prot, fgcolour, bgcolour) {
 			this->parse();
+			this->setup_tree();
 		}
 		
 		// Methods 
 		void parse() override;
+		void setup_tree() override;
 
 	private:
 

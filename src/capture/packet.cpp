@@ -92,30 +92,137 @@ void TCPPacket::parse() {
 
 void HTTPPacket::parse() {
 	// Tcp_header + data offset * 4
-	this->http_payload = (unsigned char *)(this->get_tcp_header() + 
+	this->http_payload = (unsigned char *)(this->get_data() + 
+			sizeof(struct ether_header) + 
+			4*(unsigned int)(this->get_ip_header()->type_helen & 0xf) + 
 			4*(unsigned int)(htons(this->get_tcp_header()->offset_resv_control)>>12));
 }
 
 void Packet::setup_tree() {
+	// Setup what is printed in the tree 
 	this->tree = new TreeStructure();
 	unsigned int root_index;
 
-	// Ether header 
+	// Ether header
 	this->tree->add_root_node("Ether Header", "");
 
 	root_index = this->tree->get_tree_root_count() - 1;
-	this->tree->add_child_node({root_index}, "Source MAC Address", "DE:AD:BE:EF:BA:AD");
-	this->tree->add_child_node({root_index}, "Destination MAC Address", "DE:AD:BE:EF:BA:AD");
-	this->tree->add_child_node({root_index}, "Ether Type", "0xtest123");
+	this->tree->add_child_node({root_index}, 
+			"Source MAC Address", 
+			Utils::convert_mac_address(this->get_ether_header()->shost));
+	this->tree->add_child_node({root_index}, 
+			"Destination MAC Address", 
+			Utils::convert_mac_address(this->get_ether_header()->dhost));
 
-	this->tree->add_child_node({root_index,0}, "Test123", "Value123");
+	// Hex version of the string
+	this->tree->add_child_node({root_index}, 
+			"Ether Type", 
+			Utils::to_hex((int)htons(this->get_ether_header()->type), 4));
 
 	// IP header
 	this->tree->add_root_node("IP Header", "");
 
 	root_index = this->tree->get_tree_root_count() - 1;
-	this->tree->add_child_node({root_index}, "Source", "192.168.0.69");
-	this->tree->add_child_node({root_index}, "Destination", "192.168.0.1");
+
+	this->tree->add_child_node({root_index}, 
+			"Source IP", 
+			Utils::convert_ip(htonl(this->get_ip_header()->source)));
+	this->tree->add_child_node({root_index}, 
+			"Destination IP", 
+			Utils::convert_ip(htonl(this->get_ip_header()->dest)));
+
+	this->tree->add_child_node({root_index}, 
+			"IP Version", 
+			Utils::to_hex((this->get_ip_header()->type_helen&0xf0) >> 4, 1));
+	this->tree->add_child_node({root_index}, 
+			"Header Length (32 Bits)", 
+			Utils::to_hex(this->get_ip_header()->type_helen&0x0f, 1));
+	this->tree->add_child_node({root_index}, 
+			"Type Of Service", 
+			Utils::to_hex(this->get_ip_header()->tos, 2));
+	this->tree->add_child_node({root_index}, 
+			"Rest of packet length",
+			Utils::to_hex(htons(this->get_ip_header()->len), 4));
+	this->tree->add_child_node({root_index}, 
+			"Packet ID",
+			std::to_string((int)htons(this->get_ip_header()->id)));
+	this->tree->add_child_node({root_index}, 
+			"IP Flag", 
+			Utils::to_info_binary(htons(this->get_ip_header()->flag_frag_offset), 16, 0xe000));
+	this->tree->add_child_node({root_index}, 
+			"Fragment Offset", 
+			Utils::to_info_binary(htons(this->get_ip_header()->flag_frag_offset), 16, 0x1fff));
+	this->tree->add_child_node({root_index}, 
+			"Time to live (s)",
+			std::to_string((int)this->get_ip_header()->ttl));
+	this->tree->add_child_node({root_index}, 
+			"Protocol Type",
+			Utils::to_hex(this->get_ip_header()->protocol, 2));
+	this->tree->add_child_node({root_index}, 
+			"Checksum",
+			Utils::to_hex(htons(this->get_ip_header()->checksum), 4));
+}
+
+void TCPPacket::setup_tree() {
+	unsigned int root_index;
+
+	// TCP header
+	this->get_tree()->add_root_node("TCP Header", "");
+
+	root_index = this->get_tree()->get_tree_root_count() - 1;
+	this->get_tree()->add_child_node({root_index}, 
+			"Source port", 
+			std::to_string((int)htons(this->get_tcp_header()->source_port)));
+	this->get_tree()->add_child_node({root_index},
+			"Destination port",
+			std::to_string((int)htons(this->get_tcp_header()->dest_port)));
+	
+	this->get_tree()->add_child_node({root_index}, 
+			"Sequence number",
+			Utils::to_hex(htonl(this->get_tcp_header()->seq), 8));
+	this->get_tree()->add_child_node({root_index}, 
+			"Acknowledgement number",
+			Utils::to_hex(htonl(this->get_tcp_header()->ack), 8));
+
+	this->get_tree()->add_child_node({root_index}, 
+			"Data offset (32 Bits)",
+			Utils::to_info_binary(htons(this->get_tcp_header()->offset_resv_control), 16, 0xf000));
+	
+	this->get_tree()->add_child_node({root_index}, 
+			"Reserved",
+			Utils::to_info_binary(htons(this->get_tcp_header()->offset_resv_control), 16, 0x0fc0));
+
+	this->get_tree()->add_child_node({root_index}, 
+			"TCP Flags",
+			Utils::to_info_binary(htons(this->get_tcp_header()->offset_resv_control), 16, 0x003f) + " | URG,ACK,PSH,RST,SYN,FIN");
+
+	this->get_tree()->add_child_node({root_index},
+			"Window (bytes)",
+			Utils::to_hex(htons(this->get_tcp_header()->window), 4));
+	
+	this->get_tree()->add_child_node({root_index},
+			"Checksum",
+			Utils::to_hex(htons(this->get_tcp_header()->checksum), 4));
+
+	this->get_tree()->add_child_node({root_index},
+			"Urgent Pointer",
+			Utils::to_hex(htons(this->get_tcp_header()->urgent_pointer), 4));
+}
+
+void HTTPPacket::setup_tree() {
+	unsigned int root_index;
+
+	// HTTP header
+	this->get_tree()->add_root_node("HTTP Header", "");
+
+	root_index = this->get_tree()->get_tree_root_count() - 1;
+
+	// Get the first line as display
+	std::string payload = std::string((char *)this->http_payload);
+	std::string first_line = payload.substr(0, payload.find("\n"));
+	this->get_tree()->add_child_node({root_index}, 
+			"HTTP Payload", 
+			first_line + " ...");
 }
 
 PacketStream::PacketStream(unsigned char error_type) : error_type(error_type) {
@@ -126,7 +233,6 @@ PacketStream::~PacketStream() {
 	for (unsigned int i = 0; i < this->packet_stream.size(); ++i) 
 		delete this->packet_stream[i];
 }
-
 
 template <class T>
 T *PacketStream::new_packet(int frame, 
