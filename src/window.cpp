@@ -182,7 +182,6 @@ void Window::init_menu() {
 }
 
 void Window::init_layout() {
-
 	// Overall container	
 	this->main_widget = new QWidget(this);
 	this->main_widget->move(0, 15);
@@ -214,12 +213,6 @@ void Window::init_layout() {
 
 	// Treeview for packet structure
 	this->packet_tree = new PacketTree(this);
-	this->packet_tree->add_tree_root(QString("Root1"), QString("Value1"));
-	this->packet_tree->add_tree_root(QString("Root2"), QString("Value2"));
-
-	this->packet_tree->add_tree_child((std::vector<unsigned int>){0}, QString("Child1"), QString("ValueChild1"));
-	this->packet_tree->add_tree_child((std::vector<unsigned int>){0, 0}, QString("ChildChild1"), QString("ValueChildChild1"));
-
 	this->connect(this->packet_table, &PacketTable::cellClicked, 
 			this, &Window::load_packet_tree);
 

@@ -1,16 +1,28 @@
 #include "tree.hpp"
 
 PacketTree::PacketTree(QWidget *parent) : QTreeWidget(parent) {
+
+	// Name : Value 
 	this->setColumnCount(2);
+	this->setHeaderLabels(QStringList({"Key","Value"}));
+
+	// Automatically resize column widths on opening children nodes
+	this->connect(this, &QTreeWidget::itemExpanded,
+			this, &PacketTree::resize_all);
+	this->connect(this, &QTreeWidget::itemCollapsed,
+			this, &PacketTree::resize_all);
 }
 
 PacketTree::~PacketTree() {
+}
 
+void PacketTree::resize_all() {
+	for (int i = 0; i < this->columnCount(); ++i)
+		this->resizeColumnToContents(i);
 }
 
 QTreeWidgetItem *PacketTree::add_tree_root(QString name, QString value) {
 	QTreeWidgetItem *item = new QTreeWidgetItem(this);
-
 	item->setText(0, name);
 	item->setText(1, value);
 
@@ -32,6 +44,7 @@ QTreeWidgetItem *PacketTree::add_tree_child(std::vector<unsigned int> indexes, Q
 	QTreeWidgetItem *child_item = new QTreeWidgetItem();
 	child_item->setText(0, name);
 	child_item->setText(1, value);
+	child_item->setTextAlignment(0, Qt::AlignRight);
 	cur_item->addChild(child_item);
 
 	return child_item;
@@ -80,4 +93,10 @@ void PacketTree::load_tree(TreeStructure *tree) {
 				QString::fromStdString(i->value));
 		this->load_node(root, i);
 	}
+
+	// Open very last node
+	this->topLevelItem(this->topLevelItemCount() - 1)->setExpanded(true);
+
+	// Resize each column
+	this->resize_all();
 }

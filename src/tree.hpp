@@ -23,13 +23,14 @@ class PacketTree : public QTreeWidget {
 
 		// Methods
 		void load_node(QTreeWidgetItem *parent, struct tree_node_t *node);
-		void load_tree(TreeStructure *tree);
 
 	private:
 	
 	signals:
 
 	public slots:
+		void load_tree(TreeStructure *tree);
+		void resize_all(); // Resize columns
 
 };
 
