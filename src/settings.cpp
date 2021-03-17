@@ -77,7 +77,13 @@ void Settings::generate_default_config() {
 			<< "HTTP_fg=#d7F2ba" << std::endl // HTTP 
 			<< "HTTP_bg=#306b34" << std::endl
 			<< "HTTPS_fg=#231f20" << std::endl // HTTPS
-			<< "HTTPS_bg=#817e9f" << std::endl;
+			<< "HTTPS_bg=#817e9f" << std::endl
+			<< "TREEVIEW_ROOT_fg=#e9f1f7" << std::endl // Tree view root node 
+			<< "TREEVIEW_CHILD_KEY_fg=#e9f1f7" << std::endl // Tree view child node key 
+			<< "TREEVIEW_CHILD_VAL_fg=#e9f1f7" << std::endl // Tree view child node value
+			<< "TREEVIEW_ROOT_bg=#412234" << std::endl
+			<< "TREEVIEW_CHILD_KEY_bg=#6a6f8a" << std::endl
+			<< "TREEVIEW_CHILD_VAL_bg=#9f4a54" << std::endl;
 	stream.close();
 }
 

@@ -1,6 +1,6 @@
 #include "tree.hpp"
 
-PacketTree::PacketTree(QWidget *parent) : QTreeWidget(parent) {
+PacketTree::PacketTree(Settings *settings, QWidget *parent) : QTreeWidget(parent), settings(settings) {
 
 	// Name : Value 
 	this->setColumnCount(2);
@@ -25,6 +25,10 @@ QTreeWidgetItem *PacketTree::add_tree_root(QString name, QString value) {
 	QTreeWidgetItem *item = new QTreeWidgetItem(this);
 	item->setText(0, name);
 	item->setText(1, value);
+	for (int i = 0; i < this->columnCount(); ++i) {
+		item->setBackground(i, QColor(QString::fromStdString(this->settings->get("TREEVIEW_ROOT_bg"))));
+		item->setForeground(i, QColor(QString::fromStdString(this->settings->get("TREEVIEW_ROOT_fg"))));
+	}
 
 	return item;
 }
@@ -45,6 +49,12 @@ QTreeWidgetItem *PacketTree::add_tree_child(std::vector<unsigned int> indexes, Q
 	child_item->setText(0, name);
 	child_item->setText(1, value);
 	child_item->setTextAlignment(0, Qt::AlignRight);
+
+	child_item->setBackground(0, QColor(QString::fromStdString(this->settings->get("TREEVIEW_CHILD_KEY_bg"))));
+	child_item->setForeground(0, QColor(QString::fromStdString(this->settings->get("TREEVIEW_CHILD_KEY_fg"))));
+	child_item->setBackground(1, QColor(QString::fromStdString(this->settings->get("TREEVIEW_CHILD_VAL_bg"))));
+	child_item->setForeground(1, QColor(QString::fromStdString(this->settings->get("TREEVIEW_CHILD_VAL_fg"))));
+
 	cur_item->addChild(child_item);
 
 	return child_item;
@@ -55,6 +65,13 @@ QTreeWidgetItem *PacketTree::add_tree_child(QTreeWidgetItem *parent_item, QStrin
 	QTreeWidgetItem *child_item = new QTreeWidgetItem();
 	child_item->setText(0, name);
 	child_item->setText(1, value);
+	child_item->setTextAlignment(0, Qt::AlignRight);
+
+	child_item->setBackground(0, QColor(QString::fromStdString(this->settings->get("TREEVIEW_CHILD_KEY_bg"))));
+	child_item->setForeground(0, QColor(QString::fromStdString(this->settings->get("TREEVIEW_CHILD_KEY_fg"))));
+	child_item->setBackground(1, QColor(QString::fromStdString(this->settings->get("TREEVIEW_CHILD_VAL_bg"))));
+	child_item->setForeground(1, QColor(QString::fromStdString(this->settings->get("TREEVIEW_CHILD_VAL_fg"))));
+	
 	parent_item->addChild(child_item);
 
 	return child_item;

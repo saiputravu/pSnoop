@@ -212,7 +212,7 @@ void Window::init_layout() {
 			this->packet_table, &PacketTable::reload_packets);
 
 	// Treeview for packet structure
-	this->packet_tree = new PacketTree(this);
+	this->packet_tree = new PacketTree(this->settings, this);
 	this->connect(this->packet_table, &PacketTable::cellClicked, 
 			this, &Window::load_packet_tree);
 

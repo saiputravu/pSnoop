@@ -4,16 +4,19 @@
 #include <QWidget>
 #include <QTreeWidget>
 #include <QString>
+#include <QColor>
+#include <QDebug>
 
 #include <vector>
 
 #include "capture/structure.hpp"
+#include "settings.hpp"
 
 class PacketTree : public QTreeWidget {
 	Q_OBJECT;
 
 	public:
-		PacketTree(QWidget *parent = nullptr);
+		PacketTree(Settings *settings, QWidget *parent = nullptr);
 		~PacketTree();
 		
 		// Setters 
@@ -25,6 +28,7 @@ class PacketTree : public QTreeWidget {
 		void load_node(QTreeWidgetItem *parent, struct tree_node_t *node);
 
 	private:
+		Settings *settings;
 	
 	signals:
 
