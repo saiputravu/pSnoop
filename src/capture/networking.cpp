@@ -2,6 +2,8 @@
 
 Networking::Networking(unsigned char error_type) : error_type(error_type){
 	this->packet_stream = new PacketStream(error_type);
+	// Open a dump file
+
 	this->populate_interfaces();
 }
 
@@ -10,6 +12,8 @@ Networking::~Networking() {
 	if (this->devices[0])
 		pcap_freealldevs(this->devices[0]);
 	
+	if (this->dumper)
+		pcap_dump_close(this->dumper);
 	if (this->handle)
 		pcap_close(this->handle);
 }
@@ -45,11 +49,48 @@ void Networking::open_live_device(int timeout, bool promiscuous) {
 				this->error_type, "Networking::open_live_device");
 		return;
 	}
+
+	this->dumper = pcap_dump_open(this->handle, "test123.pcap");
+	this->select_file = false;
+	this->select_interface = true;
+}
+
+void Networking::open_offline_device(const char *filename) {
+	// Check if file exists
+	std::ifstream f(filename);
+    if (!f.good()) {
+		Error::handle_error((char *)"Please enter a proper file / filepath",
+				this->error_type, "Networking::open_offline_device");
+		return;
+	}
+
+	// Open offline mode 
+	this->handle = pcap_open_offline(filename, this->errbuf);
+	if (this->handle == NULL) {
+		Error::handle_error(this->errbuf, 
+				this->error_type, "Networking::open_live_device");
+		return;
+	}
+
+	this->dumper = pcap_dump_open(this->handle, "test123.pcap");
+	this->select_file = true;
+	this->select_interface = false;
+}
+
+void Networking::open_file(const char *filename) {
+
+	// Set class attribute filename 
+	strncpy(this->selected_file, filename, 256);
+	this->selected_file[255] = 0x00;
+
+	this->open_offline_device(filename);
 }
 
 void Networking::setup_device(int index, int timeout, bool promiscuous) { 
 	if (index >= 0 && index < (this->devices).size()) {
-		this->selected_device = (this->devices[index])->name;
+		strncpy(this->selected_device, (this->devices[index])->name, 256);
+		this->selected_device[255] = 0x00;
+
 		this->set_subnet_netmask();	
 		this->open_live_device(timeout, promiscuous);
 	}
@@ -80,6 +121,12 @@ void Networking::start_listening(int max_count) {
 		if (this->get_next_packet(&packet, &header) != 0) {
 			Error::handle_error((char *)"Unable to capture packet.", 
 					this->error_type, "Networking::start_listening(int)");
+
+			// This is useful for detecting EOF for .pcap files
+			if (this->select_file)
+				this->capture_packet_err_count++;
+			if (this->capture_packet_err_count > 10)
+				max_count = 1;
 			continue;
 		}
 
@@ -105,6 +152,10 @@ void Networking::start_listening(bool *active) {
 		if (this->get_next_packet(&packet, &header) != 0) {
 			Error::handle_error((char *)"Unable to capture packet.", 
 				this->error_type, "Networking::start_listening(bool &)");
+			if (this->select_file)
+				this->capture_packet_err_count++;
+			if (this->capture_packet_err_count > 10)
+				*active = false;
 			continue;
 		}
 
@@ -119,13 +170,42 @@ void Networking::start_listening(bool *active) {
 	emit this->stopped_recv();
 }
 
-void Networking::listen_next_packet() {
+void Networking::save_packets_to_pcap(std::string filename) {
+	if (this->packet_stream->size() <= 0)
+		return;
+	std::ofstream stream;
+	stream.open(filename, std::ofstream::binary);
+	if (!stream.is_open()) {
+		Error::handle_error((char *)"Unable to open file to save .pcap", 
+				this->error_type, "Networking::save_packets_to_pcap");
+		return;
+	}
+
+	stream.write((char *)&this->pcap_hdr, sizeof(this->pcap_hdr));
+
+	// Go through each packet, and write header:packet_data
+	for (int i = 0; i < this->packet_stream->size(); ++i) {
+		Packet *pkt = (*this->packet_stream)[i];
+		stream.write((char *)pkt->get_packet_header(), sizeof(struct pcap_pkthdr));
+		stream.write((char *)pkt->get_data(), pkt->get_header_len());
+	}
+
+	stream.close();
+}
+
+int Networking::listen_next_packet() {
 	unsigned char *packet;
 	struct pcap_pkthdr header;
 	if (this->get_next_packet(&packet, &header) != 0) {
-		Error::handle_error((char *)"Unable to capture packet.",
+		if (this->capture_packet_err_count > 10)
+			return -2;
+		if (this->capture_packet_err_count == 0 || this->select_interface) 
+			// Print when they aren't consectuive or a pcap file isn't selected
+			Error::handle_error((char *)"Unable to capture packet.",
 				this->error_type, "Networking::start_listening_to_loop()");
-		return;
+		if (this->select_file)
+			this->capture_packet_err_count++;
+		return -1;
 	}
 
 	// Add packet to packet stream
@@ -133,6 +213,9 @@ void Networking::listen_next_packet() {
 	emit this->packet_recv((*this->packet_stream)[this->packet_count]);
 
 	this->packet_count++;
+	if (this->select_file)
+		this->capture_packet_err_count = 0; // Reset if the errors aren't consecutive
+	return 0;
 }
 
 int Networking::get_next_packet(unsigned char **packet, struct pcap_pkthdr *header) {
@@ -141,7 +224,10 @@ int Networking::get_next_packet(unsigned char **packet, struct pcap_pkthdr *head
 
 	*packet = (unsigned char *)pcap_next(this->handle, header);
 	if (*packet == NULL) {
-		Error::handle_error(this->errbuf, 
+			return -2;
+		if (this->capture_packet_err_count == 0 || this->select_interface) 
+			// Print when they aren't consectuive or a pcap file isn't selected
+			Error::handle_error(this->errbuf, 
 				this->error_type, "Networking::get_next_packet");
 		return -1;
 	}

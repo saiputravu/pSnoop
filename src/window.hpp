@@ -18,6 +18,7 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QActionGroup>
+#include <QFileDialog>
 #include <QFont>
 
 #include <QPieSeries>
@@ -77,6 +78,7 @@ class CaptureThread : public QThread {
 		}
 
 		void kill() {
+			// Don't use this method unless you want to start a new thread object
 			if (!this->b_pause)
 				this->resume();
 			this->mutex.lock();
@@ -92,7 +94,11 @@ class CaptureThread : public QThread {
 					this->pause_condition.wait(&this->mutex); 
 				}
 				this->mutex.unlock();
-				this->capture->listen_next_packet();
+				this->ret = this->capture->listen_next_packet();
+
+				// Pause thread to show end
+				if (ret == -2)
+					this->pause();
 			}
 		}
 
@@ -100,6 +106,7 @@ class CaptureThread : public QThread {
 		Networking *capture;
 		bool b_pause = true;
 		bool dead = false;
+		int ret = 0;
 
 		QMutex mutex;
 		QWaitCondition pause_condition;
@@ -180,6 +187,10 @@ class Window : public QMainWindow {
 		void not_implemented();
 		void about();
 		void on_exit();
+
+		// File Menu Slots
+		void select_file();
+		void select_save_file();
 
 		// Capture Menu Slots
 		void select_interface();

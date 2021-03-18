@@ -172,17 +172,17 @@ void Settings::general_tab() {
 
 void Settings::general_tab_button(QLineEdit *filepath) {
 	QFileDialog::Options options;
-	QString selectedFilter;
+	QString selected_filter;
 
-	QString fileName = QFileDialog::getOpenFileName(this,
+	QString filename = QFileDialog::getOpenFileName(this,
 		"Open",
 		filepath->text(),
 		"Config Files (*.CFG *.CONFIG);;All Files (*)",
-		&selectedFilter,
+		&selected_filter,
 		options);
 
-	if (!fileName.isEmpty()) {
-		this->config_file = fileName.toUtf8().constData();
+	if (!filename.isEmpty()) {
+		this->config_file = filename.toUtf8().constData();
 		this->parse_file();
 		filepath->setText(QString::fromStdString(this->config_file));
 	}

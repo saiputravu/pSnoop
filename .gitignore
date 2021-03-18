@@ -5,6 +5,7 @@ todo.md
 
 # Debugging files
 .gdb_history
+.pcap
 
 # VIM temp files
 *.swp

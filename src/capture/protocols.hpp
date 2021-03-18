@@ -9,7 +9,7 @@
  * 3. C reads into structures as LITTLE ENDIAN
  *
  */
- 
+
 // https://unix.superglobalmegacorp.com/Net2/newsrc/netinet/if_ether.h.html
 // Types in the Ether Header Structure
 #define ETHERTYPE_ARP 0x0806

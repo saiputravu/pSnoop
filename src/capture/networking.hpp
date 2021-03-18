@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
+#include <fstream>
 #include <future>
 
 #include <pcap.h>
@@ -30,14 +31,19 @@ class Networking : public QObject {
 			return nullptr;
 		}
 		char *get_cur_device() { return this->selected_device; }
+		char *get_cur_file() { return this->selected_file; }
 		bpf_u_int32 get_subnet() { return this->subnet; }
 		bpf_u_int32 get_netmask() { return this->netmask; }
 		unsigned int get_packet_count() { return this->packet_count; }
 		PacketStream *get_packet_stream() { return this->packet_stream; }
+		bool get_select_file() { return this->select_file; }
+		bool get_select_interface() { return this->select_interface; }
 
 		// Setters
 		bool set_subnet_netmask();
 		void setup_device(int index, int timeout=1000, bool promiscuous=false); 
+		void open_file(const char *filename);
+
 		void clear_packets() { 
 			this->packet_count = 0;
 			this->get_packet_stream()->clear_packets();
@@ -46,7 +52,8 @@ class Networking : public QObject {
 		// Methods
 		void start_listening(int max_count=0);
 		void start_listening(bool *active);
-		void listen_next_packet();
+		int listen_next_packet();
+		void save_packets_to_pcap(std::string filename);
 		
 		int get_next_packet(unsigned char **packet, struct pcap_pkthdr *header);
 		int set_filter(const char *expression, int optimize=0);
@@ -58,6 +65,7 @@ class Networking : public QObject {
 		// Methods
 		int populate_interfaces();
 		void open_live_device(int timeout, bool promiscuous);
+		void open_offline_device(const char *filename);
 
 		// Properties
 		unsigned char error_type;			// Type of error for Error.hpp
@@ -66,12 +74,30 @@ class Networking : public QObject {
 		pcap_t *handle = nullptr;			// pcap_t handle to the selected network interface
 		std::vector<pcap_if_t *> devices;	// Current devices available on the computer
 
-		char *selected_device = "\0";		// String of the selected network interface
+		bool select_file = false;
+		bool select_interface = false; 
+		int capture_packet_err_count = 0;	// Number of failed captures - used to detect EOF for .pcap files
+
+		char selected_device[256] = "\0";	// String of the selected network interface
+		char selected_file[256] = "\0";		// String of selected file to capture
 		bpf_u_int32 subnet = 0;		// 32bit IP Subnet of selected network interface
 		bpf_u_int32 netmask = 0;	// 32bit Network Mask of the selected network interface
 
 		unsigned int packet_count = 0;	// Count of packets captured so far
 		PacketStream *packet_stream;	// Stream / List of all captured packet objects
+		pcap_dumper_t *dumper = nullptr;
+
+		// Private structures
+		struct pcap_hdr_s {
+			unsigned int magic_number = 0xa1b2c3d4; /* magic number */
+			unsigned short version_major = 0x2;		/* major version number */
+			unsigned short version_minor = 0x4;		/* minor version number */
+			int thiszone = 0x0;						/* GMT to local correction */
+			unsigned int sigfigs = 0x0;				/* accuracy of timestamps */
+			unsigned int snaplen = 0x00040000;		/* max bytes len of captured packets */
+			unsigned int network = 0x01;			/* data link type */
+		} pcap_hdr;
+
 
 	signals:
 		void packet_recv(Packet *packet); 

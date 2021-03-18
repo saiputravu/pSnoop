@@ -52,7 +52,7 @@ void Window::init_menu() {
 	this->connect(this->open_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::select_file);
 	
 	this->save_as_action = new QAction("&Save As", this);
 	this->save_as_action->setShortcut(QKeySequence("Ctrl+s"));
@@ -60,7 +60,8 @@ void Window::init_menu() {
 	this->connect(this->save_as_action, 
 			&QAction::triggered, 
 			this, 
-			&Window::not_implemented);
+			&Window::select_save_file);
+	void select_save_file();
 
 	this->settings_action = new QAction("Preferences", this);
 	this->settings_action->setShortcut(QKeySequence("Ctrl+p"));
@@ -283,7 +284,7 @@ void Window::capture_filter() {
 	if (!this->capture_thread->get_pause()) {
 		error_pop_up("You can only set a capture filter when not listening!");
 		return;
-	} else if (!strncmp("\0", this->capture.get_cur_device(), 1)) { // Check if interface selected
+	} else if (!this->capture.get_select_interface() || !this->capture.get_select_file()) { // Check if interface selected
 		error_pop_up("You must select an interface first!");
 		return;
 	}
@@ -385,22 +386,27 @@ void Window::statistics_hover(QPieSlice *slice, bool state) {
 }
 
 void Window::begin_capture() {
-	if (this->capture_active) {
-		this->error_pop_up("Capture already active!");
-	} else if (strncmp("\0", this->capture.get_cur_device(), 1)) { // Check if interface selected
-
+	// Check if interface selected
+	if (this->capture_active){
+		this->error_pop_up("Capture already active, please end or restart capture.");
+	} else if (!this->capture.get_select_interface() || !this->capture.get_select_file()) { 
 		// Run the thread if never run before
 		// Else resume thread
+		this->capture_active = true;
 		if (!this->capture_thread->isRunning()) {
 			this->capture_thread->start();
 		} else {
 			this->capture_thread->resume();
 		}
 
-		this->setWindowTitle(QString("Live Capturing: ") + QString(this->capture.get_cur_device()));
-	}
-	 else {
-		this->error_pop_up ("Please select an interface first!");
+		if (this->capture.get_select_interface())
+			this->setWindowTitle(QString("Live Capturing: ") + QString(this->capture.get_cur_device()));
+		else if (this->capture.get_select_file())
+			this->setWindowTitle(QString("Offline Capturing: ") + QString(this->capture.get_cur_file()));
+		else
+			this->setWindowTitle(QString("Capturing"));
+	} else {
+		this->error_pop_up("Please select an interface or file first!");
 	}
 }
 
@@ -409,6 +415,8 @@ void Window::end_capture () {
 
 	// Pause thread 
 	this->capture_thread->pause();
+	// Set capture active flag false
+	this->capture_active = false;
 
 	this->setWindowTitle("Ended live capture ... ");
 }
@@ -422,6 +430,45 @@ void Window::restart_capture () {
 	this->setWindowTitle("Reseting packet table ... ");
 
 	this->begin_capture();
+}
+
+void Window::select_save_file() {
+	QFileDialog::Options options;
+	QString selected_filter;
+	
+	QString filename = QFileDialog::getSaveFileName(this, 
+			"Save As",
+			"",
+			"Pcap Files (*.PCAP);;Alll Files (*)",
+			&selected_filter,
+			options);
+
+
+	if (this->capture.get_packet_stream()->size() <= 0) {
+		this->error_pop_up("Please capture some packets first!");
+		return;
+	}
+	if (!filename.endsWith(".pcap"))
+		filename += ".pcap";
+	this->capture.save_packets_to_pcap(filename.toUtf8().constData());
+}
+
+void Window::select_file() {
+	QFileDialog::Options options;
+	QString selected_filter;
+
+	QString filename = QFileDialog::getOpenFileName(this, 
+			"Open",
+			"",
+			"Pcap Files (*.PCAP);;All Files (*)",
+			&selected_filter,
+			options);
+
+	this->setWindowTitle(QString("Selected file: ") + filename);
+	this->capture.open_file((const char *)filename.toLocal8Bit().data());
+
+	if (this->capture.get_select_file())
+		this->begin_capture(); // Auto-begin the capture
 }
 
 void Window::load_packet_bytes(int row, int col) {	
