@@ -389,7 +389,7 @@ void Window::begin_capture() {
 	// Check if interface selected
 	if (this->capture_active){
 		this->error_pop_up("Capture already active, please end or restart capture.");
-	} else if (!this->capture.get_select_interface() || !this->capture.get_select_file()) { 
+	} else if (this->capture.get_select_interface() || this->capture.get_select_file()) { 
 		// Run the thread if never run before
 		// Else resume thread
 		this->capture_active = true;
