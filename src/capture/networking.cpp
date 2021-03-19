@@ -11,11 +11,50 @@ Networking::~Networking() {
 	// Free all the allocated memory, prevent a memory leak
 	if (this->devices[0])
 		pcap_freealldevs(this->devices[0]);
-	
+
+
+	// Just delete temp file as dumper is automatically free'd
 	if (this->dumper)
-		pcap_dump_close(this->dumper);
+		this->close_dump_without_save();
+
 	if (this->handle)
 		pcap_close(this->handle);
+}
+
+void Networking::create_new_dump() {
+	this->tempfile = std::tmpnam(nullptr);
+	this->dumper = pcap_dump_open(this->handle, this->tempfile.c_str());
+	if (this->dumper == nullptr) {
+		Error::handle_error("Unable to create pcap dumper",
+				this->error_type, "Networking::create_new_dump");
+		return;
+	}
+}
+
+void Networking::close_dump(std::string savefile) {
+	// Ensure savefile is full path otherwise tmp file moved to current dir.
+	
+	if (this->dumper) {
+		// Delete temp file
+		pcap_dump_close(this->dumper);
+
+		// Move temp file to savefile location
+		// Find a better way than literally copying data file to file
+		// Which is also OS independant
+		std::ifstream in(this->tempfile, std::ios::in | std::ios::binary);
+		std::ofstream out(savefile, std::ios::out | std::ios::binary);
+		out << in.rdbuf();
+		std::remove(this->tempfile.c_str());
+	}
+}
+
+void Networking::close_dump_without_save() {
+	// Only delete file, dumper is auto-free'd
+	if (this->dumper) {
+		std::ifstream f(this->tempfile.c_str());
+		if (f.good())
+			std::remove(this->tempfile.c_str());
+	}
 }
 
 bool Networking::set_subnet_netmask() {
@@ -50,7 +89,7 @@ void Networking::open_live_device(int timeout, bool promiscuous) {
 		return;
 	}
 
-	this->dumper = pcap_dump_open(this->handle, "test123.pcap");
+	this->create_new_dump();
 	this->select_file = false;
 	this->select_interface = true;
 }
@@ -72,7 +111,7 @@ void Networking::open_offline_device(const char *filename) {
 		return;
 	}
 
-	this->dumper = pcap_dump_open(this->handle, "test123.pcap");
+	this->create_new_dump();
 	this->select_file = true;
 	this->select_interface = false;
 }
@@ -231,6 +270,9 @@ int Networking::get_next_packet(unsigned char **packet, struct pcap_pkthdr *head
 				this->error_type, "Networking::get_next_packet");
 		return -1;
 	}
+
+	// Save to packet dump file
+	pcap_dump((unsigned char *)this->dumper, header, (const unsigned char *)*packet);
 
 	return 0;
 }

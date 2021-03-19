@@ -29,7 +29,7 @@ class Packet {
 
 		// Getters
 		int get_frame() { return this->frame; }
-		unsigned int get_header_len() { return this->header->caplen; } // Packet length
+		unsigned int get_header_len() { return this->header->len; } // Packet length
 		time_t get_header_timestamp() { return this->header->ts.tv_sec; }
 		struct pcap_pkthdr *get_packet_header() { return this->header; }
 		unsigned char *get_data() { return this->data; }

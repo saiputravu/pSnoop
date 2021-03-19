@@ -429,6 +429,10 @@ void Window::restart_capture () {
 	this->capture.clear_packets();
 	this->setWindowTitle("Reseting packet table ... ");
 
+	// Create new dump file as a new session
+	this->capture.close_dump_without_save();
+	this->capture.create_new_dump();
+
 	this->begin_capture();
 }
 
@@ -448,9 +452,12 @@ void Window::select_save_file() {
 		this->error_pop_up("Please capture some packets first!");
 		return;
 	}
+
 	if (!filename.endsWith(".pcap"))
 		filename += ".pcap";
-	this->capture.save_packets_to_pcap(filename.toUtf8().constData());
+
+	if (filename.toUtf8().constData() != "")
+		this->capture.close_dump(filename.toUtf8().constData());
 }
 
 void Window::select_file() {

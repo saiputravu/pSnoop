@@ -54,6 +54,10 @@ class Networking : public QObject {
 		void start_listening(bool *active);
 		int listen_next_packet();
 		void save_packets_to_pcap(std::string filename);
+
+		void create_new_dump();	// Creates a /tmp file to save dump to 
+		void close_dump(std::string savefile); // Saves /tmp file to disk
+		void close_dump_without_save(); // Close the dump file without saving
 		
 		int get_next_packet(unsigned char **packet, struct pcap_pkthdr *header);
 		int set_filter(const char *expression, int optimize=0);
@@ -86,6 +90,7 @@ class Networking : public QObject {
 		unsigned int packet_count = 0;	// Count of packets captured so far
 		PacketStream *packet_stream;	// Stream / List of all captured packet objects
 		pcap_dumper_t *dumper = nullptr;
+		std::string tempfile;
 
 		// Private structures
 		struct pcap_hdr_s {
