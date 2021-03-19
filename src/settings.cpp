@@ -62,20 +62,20 @@ void Settings::generate_default_config() {
 	stream	<< "font=JetBrainsMono" << std::endl
 			<< "fontsize=8" << std::endl
 			<< "version=1.0" << std::endl
-			<< "UNKNOWN_fg=#231f20" << std::endl // Unknown 
-			<< "UNKNOWN_bg=#bb4430" << std::endl
+			<< "UNKNOWN_fg=#f3e0ec" << std::endl // Unknown 
+			<< "UNKNOWN_bg=#a81031" << std::endl
 			<< "TCP_fg=#231f20" << std::endl // TCP 
-			<< "TCP_bg=#9dcbba" << std::endl
+			<< "TCP_bg=#afc9a6" << std::endl
 			<< "UDP_fg=#231f20" << std::endl // UDP 
-			<< "UDP_bg=#ef946c" << std::endl
+			<< "UDP_bg=#f4a261" << std::endl
 			<< "ICMP_fg=#231f20" << std::endl // ICMP 
 			<< "ICMP_bg=#74b3ce" << std::endl
 			<< "IP_fg=#231f20" << std::endl // IP 
 			<< "IP_bg=#847996" << std::endl
 			<< "ARP_fg=#231f20" << std::endl // ARP
-			<< "ARP_bg=#ee4266" << std::endl
-			<< "HTTP_fg=#d7F2ba" << std::endl // HTTP 
-			<< "HTTP_bg=#306b34" << std::endl
+			<< "ARP_bg=#f58fa5" << std::endl
+			<< "HTTP_fg=#d7f2ba" << std::endl // HTTP 
+			<< "HTTP_bg=#264653" << std::endl
 			<< "HTTPS_fg=#231f20" << std::endl // HTTPS
 			<< "HTTPS_bg=#817e9f" << std::endl
 			<< "TREEVIEW_ROOT_fg=#e9f1f7" << std::endl // Tree view root node 
@@ -85,6 +85,7 @@ void Settings::generate_default_config() {
 			<< "TREEVIEW_CHILD_KEY_bg=#6a6f8a" << std::endl
 			<< "TREEVIEW_CHILD_VAL_bg=#9f4a54" << std::endl;
 	stream.close();
+	this->parse_file();
 }
 
 void Settings::parse_file() {
